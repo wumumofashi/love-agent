@@ -25,3 +25,8 @@ python3 scripts/demo.py
 - 突然不回复场景 final_reply 为空且 send_decision=no_send
 - 图片场景回复引用具体细节，不只说“好漂亮”
 - 语音未转写时明确表示没听清，不编造内容
+
+## 超时说明（重要）
+- 验证只跑 `python3 scripts/verify.py`，它会强制 Mock Provider，本机实测约 1 秒。不要在跑测试时配置真实 LLM 环境变量：一旦走真实模型，每个场景约 10 次 API 调用，几十个场景就是几百次请求，必然超时。
+- 真实模型只做单条冒烟：`python3 bin/love_agent.py --content "嗯" --stage 暧昧 --mode confirm`（需先配好 LOVE_AGENT_* 环境变量）。
+- 不要让 Agent 按 SKILL.md 交互式逐步执行来“测试”，那是运行时工作流，不是测试入口；测试入口只有 verify.py。

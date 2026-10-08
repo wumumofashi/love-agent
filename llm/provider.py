@@ -21,12 +21,12 @@ def load_provider(project_root: str|Path, config: dict|None=None) -> LLMProvider
         try: cfg=json.loads(p.read_text(encoding="utf-8"))
         except Exception: cfg={}
     if config: cfg={**cfg, **config}
-    provider_name=os.environ.get("LOVE_AGENT_LLM_PROVIDER") or cfg.get("provider","mock")
+    provider_name=(config or {}).get("provider") or os.environ.get("LOVE_AGENT_LLM_PROVIDER") or cfg.get("provider","mock")
     if provider_name=="openai_compatible":
         from .openai_compatible import OpenAICompatibleProvider
         prov=OpenAICompatibleProvider(
-            base_url=os.environ.get("LOVE_AGENT_BASE_URL") or cfg.get("base_url",""),
-            model=os.environ.get("LOVE_AGENT_MODEL") or cfg.get("model",""),
+            base_url=(config["base_url"] if config and "base_url" in config else (cfg.get("base_url") or os.environ.get("LOVE_AGENT_BASE_URL") or "")),
+            model=(config["model"] if config and "model" in config else (cfg.get("model") or os.environ.get("LOVE_AGENT_MODEL") or "")),
             api_key_env=cfg.get("api_key_env","LOVE_AGENT_API_KEY"),
             temperature=float(cfg.get("temperature",0.3)))
         if prov.available(): return prov

@@ -6,7 +6,7 @@ class OpenAICompatibleProvider(LLMProvider):
     """Real OpenAI-compatible chat/completions provider (DeepSeek/OpenAI/etc).
     Reads the key from the environment variable named in config; never stores it."""
     name="openai_compatible"
-    def __init__(self, base_url: str, model: str, api_key_env: str="LOVE_AGENT_API_KEY", temperature: float=0.3, timeout: float=60):
+    def __init__(self, base_url: str, model: str, api_key_env: str="LOVE_AGENT_API_KEY", temperature: float=0.3, timeout: float=25):
         self.base_url=(base_url or "").rstrip("/"); self.model=model or ""; self.api_key_env=api_key_env; self.temperature=temperature; self.timeout=timeout
         self.calls=[]
     def available(self) -> bool:
