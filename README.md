@@ -15,7 +15,7 @@
 
 ---
 
-## 🌍 English
+## English
 
 ### What is love-agent?
 
@@ -128,7 +128,7 @@ MIT License — free for personal and commercial use.
 
 ---
 
-## 🇨🇳 中文
+## 中文
 
 ### 这是什么？
 
@@ -188,7 +188,7 @@ python bin/love_agent.py --content "对方说的话" --mode suggest
 
 ---
 
-## 🇯🇵 日本語
+## 日本語
 
 ### love-agent とは？
 
@@ -215,7 +215,7 @@ python bin/love_agent.py --content "对方说的话" --mode suggest
 
 ---
 
-## 🇰🇷 한국어
+## 한국어
 
 ### love-agent란?
 
@@ -242,7 +242,7 @@ python bin/love_agent.py --content "对方说的话" --mode suggest
 
 ---
 
-## 🇪🇸 Español
+## Español
 
 ### ¿Qué es love-agent?
 
@@ -269,7 +269,7 @@ Observar → Recordar → Interpretar → Estimar → Estrategizar → Generar �
 
 ---
 
-## 🇫🇷 Français
+## Français
 
 ### Qu'est-ce que love-agent ?
 
@@ -296,7 +296,7 @@ Observer → Se souvenir → Interpréter → Estimer → Stratégiser → Gén�
 
 ---
 
-## 🇩🇪 Deutsch
+## Deutsch
 
 ### Was ist love-agent?
 
@@ -323,7 +323,7 @@ Beobachten → Erinnern → Interpretieren → Einschätzen → Strateisieren �
 
 ---
 
-## 🇻🇳 Tiếng Việt
+## Tiếng Việt
 
 ### love-agent là gì?
 
@@ -350,7 +350,7 @@ Quan sát → Ghi nhớ → Diễn giải → Ước lượng → Lập chiến 
 
 ---
 
-## 🇮🇩 Indonesia
+## Indonesia
 
 ### Apa itu love-agent?
 
@@ -377,7 +377,7 @@ Amati → Ingat → Interpretasi → Estimasi → Strategi → Generate → Simu
 
 ---
 
-## 🇹🇭 Thai
+## Thai
 
 ### love-agent คืออะไร?
 
