@@ -12,6 +12,33 @@ version: "0.1.0"
 
 心理学层只负责理解，不直接写最终聊天文本。核心判断由统一 LLM Provider 完成（llm/：interpret→stage→strategize→generate→simulate→critic→revise，OpenAI-compatible，Mock 供 CI）；关键词规则只是 fast pre-classifier、安全门与 LLM 不可用时的 fallback，不得冒充最终智能。KnowledgeBase 的 Tier 条目与人物 Memory 必须实际进入 LLM prompt（可由 llm_prompt_audit 核查）。
 
+## 如何直接使用（给宿主 Agent 的执行说明）
+
+当用户给出对方的一句话并问「怎么回 / 她什么意思」时，宿主 Agent 应直接调用本技能的 CLI，不要自己临场编话术：
+
+```bash
+cd <skill_dir>
+python3 bin/love_agent.py --content "对方原话" --stage 暧昧 --mode confirm
+```
+
+- `--mode`：suggest（只建议）| confirm（生成等确认，默认）| autopilot（达标才可发，敏感话题强制拦截）。
+- 需要完整上下文时用 JSON 输入：`python3 bin/love_agent.py --json '{"content":"…","relationship_stage":"暧昧","recent_context":"…","person":{"traits":"慢热，独立，需要空间"},"mode":"confirm"}'`，也可用 `--json -` 从 stdin 读。
+- CLI 输出 JSON：核心字段 `possible_interpretations`（带 confidence）、`relationship_stage`、`recommended_strategy`、`final_reply`、`confidence`、`send_decision`、`decision_reason`。把 `final_reply` 作为建议回复呈现给用户，并附一句解读依据；不要把推测说成事实。
+- 人物长期记忆在 `memory/people/<person_id>/`，用 `--person-id` 指定；没有档案时先按模板新建，不要编造对方历史。
+
+## 大脑配置（真实 LLM）
+
+`config/model.json` 已锁定：provider=openai_compatible，base_url=https://apihub.agnes-ai.com/v1，model=**agnes-2.5-flash**。宿主只需在环境变量中提供 key（永远不要写进任何文件）：
+
+```bash
+export LOVE_AGENT_API_KEY="sk-..."
+```
+
+- 全部 LLM 调用**串行**执行（Provider 内置串行锁，10 步链路一步接一步），禁止并行调用本技能处理同一条消息。
+- 真实速度参考：单条消息约 50–60 秒（10 次调用），这是该模型的实际速度；宿主应告知用户正在分析，不要因为慢而中断或改用临场编造。
+- 未设置 `LOVE_AGENT_API_KEY` 时引擎回退到确定性 Mock 并明确标 `llm_provider_used`，不得把 Mock 输出冒充真实模型结果。
+- 自检：`python3 scripts/verify.py` 应输出 `HARNESS_RESULT=PASS`（该命令强制走 Mock，约 1 秒）。
+
 ## 三种模式（默认建议模式）
 
 - MODE 1 suggest（建议）：分析+建议，用户自己发。
