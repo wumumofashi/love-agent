@@ -80,7 +80,13 @@ class LoveAgentEngine:
             if isinstance(v,dict) and isinstance(person.get(k),dict): person[k]={**person[k], **v}
             else: person[k]=v
         ctx["person"]=person; ctx["person_memory"]=mem
-        ctx["recent_context"]=raw.get("recent_context","") or (mem.get("conversation_summary") or {}).get("summary","")
+        ctx["recent_context"]=raw.get("recent_context","")
+        if not ctx["recent_context"]:
+            try:
+                _imp=json.loads((self.root/"memory/people"/str(person_id)/"conversation_summary.json").read_text(encoding="utf-8"))
+                ctx["recent_context"]=_imp.get("recent_context_from_import","")
+            except Exception:
+                ctx["recent_context"]=(mem.get("conversation_summary") or {}).get("summary","")
         ctx["recent_sent_texts"]=raw.get("recent_sent_texts",[])
         mm=self.observe(raw); ctx["multimodal"]=mm
         msg=raw.get("content","") or mm.get("transcript","") or mm.get("description","")
@@ -135,7 +141,7 @@ class LoveAgentEngine:
                              "person_memory":mem,"provided_stage":raw.get("relationship_stage",""),"pre_flags":flags,
                              "observed_facts":facts,"multimodal":mm,"multimodal_kind":mm.get("kind","text"),
                              "relationship_stage":ctx.get("relationship_stage",""),"possible_interpretations":ctx.get("possible_interpretations",[]),
-                             "reply_intent":ctx.get("reply_intent",""),"user_goal":ctx["user_goal"]},
+                             "reply_intent":ctx.get("reply_intent",""),"user_goal":ctx["user_goal"],"user_persona":raw.get("user_persona",""),"user_persona_rule":"Replies must be written in the customer's own persona/voice (user_persona), not a generic tone."},
                   "knowledge_tiered":kb_hits,"knowledge_prompt_block":kb_block,
                   "tier_rule":"Tier C is practical examples only, never scientific fact. Tier D is this person's memory and outranks generic advice."}
             if extra: base["context"].update(extra)
