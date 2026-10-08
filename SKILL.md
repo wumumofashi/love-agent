@@ -71,7 +71,7 @@ export LOVE_AGENT_API_KEY="sk-..."
 
 本技能可作为微信聊天技能供客户使用。宿主 Agent 必须带客户**按顺序**走完以下 7 步，缺一步不开工（宿主大脑模式与 CLI 模式都适用，CLI 命令见下）：
 
-1. **配置微信环境**：确认客户在 Windows 电脑上已登录微信；生产环境走 LearnLove 路线（微信 DB 解密、约 2 秒轮询监听、阀门 L1、剪贴板/pyautogui 发送，见 `adapters/wechat/README.md`）。环境没就绪之前只做分析和建议，不得声称已接通微信。检查：`python3 scripts/wechat_env_check.py`（如存在）或按 adapters 文档逐项确认。
+1. **配置微信环境**：确认客户在 Windows 电脑上已登录微信；生产环境走 LearnLove 路线（微信 DB 解密、约 2 秒轮询监听、阀门 L1、剪贴板/pyautogui 发送，见 `adapters/wechat/README.md`）。环境没就绪之前只做分析和建议，不得声称已接通微信。生产传输层已对接 **wxauto**（GitHub cluic/wxauto，Windows 微信客户端自动化，见 `adapters/wechat/wxauto_adapter.py` 与 `runner.py`）；环境检查：`python3 scripts/wechat_env_check.py`。客户机：`pip install wxauto`（微信 3.x）或 `wxauto4`（微信 4.x），登录后 `python adapters/wechat/runner.py --chat 对方备注名 --person-id <id> --mode confirm`；真实自动发送必须额外加 `--live`，默认 dry-run。LearnLove 的 DB 路线为备选（见 adapters/wechat/README.md）。
 2. **确定聊天对象**：向客户确认正在聊的是谁，为其建立独立人物档案 `memory/people/<person_id>/`；不同对象必须不同 person_id，档案严格隔离，禁止把 A 的记忆用到 B 身上。
 3. **导入聊天记录**：有历史记录时导入该对象的档案，作为关系判断和「最近聊天」依据——CLI：`python3 bin/love_agent.py --person-id <id> --import-history 聊天记录.txt`（.txt 每行一条，或 .json 的 messages 数组）。导入内容只进这个人的档案。
 4. **没有聊天记录时定阶段**：让客户自己填写当前关系阶段（陌生/认识/普通朋友/熟人/暧昧/追求/恋爱/稳定恋爱/冲突/婚姻）——CLI：`--set-stage 暧昧`。此阶段为客户自述证据，后续判断仍要给 confidence 和备选阶段，不强行定性。

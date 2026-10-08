@@ -1,0 +1,4 @@
+# love-agent core has no third-party deps.
+# WeChat transport (Windows customer machine only):
+#   pip install wxauto    # WeChat 3.x
+#   pip install wxauto4   # WeChat 4.x

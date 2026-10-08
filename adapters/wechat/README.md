@@ -19,3 +19,14 @@
 ## 安装前提（真实发送）
 
 必须在用户 Windows 电脑：微信已登录、LearnLove 已解密 DB、配置 `~/.learnlove_data/config.yaml`、valve 设置、联系人 wxid 指定。本仓库在当前 Linux VM 只能做到 Mock 与接口验证，未真实发送。
+
+## 2026-10-09 更新：生产传输层改选 wxauto（对接完成）
+
+调研结论（GitHub 实测）：个人微信自动回复最成熟的对接层是 **cluic/wxauto**（约 7.4k stars，Apache-2.0，2026 年仍在推送），直接驱动 Windows 微信客户端收发，不碰网页协议、不需要解密数据库，客户侧部署最轻。Wechaty（23k stars）依赖 puppet（padlocal 等）收费且不稳；CowAgent（47k stars，前 chatgpt-on-wechat）是整套 Agent 框架而非传输层，接进来会喧宾夺主；LearnLove 的 DB 路线保留为重型备选。
+
+已对接：
+- `wxauto_adapter.py`：`WxAutoWeChatAdapter`（receive 归一化、listen、send、monitor），非 Windows 或未装 wxauto 时明确报错，不假装接通。
+- `runner.py`：客户机运行入口。监听指定聊天 → 引擎决策 → suggest/confirm 永不发送只写 outbox；autopilot 仅当决策为 auto_send 才发送，且真实发送必须显式加 `--live`，默认 dry-run。
+- `scripts/wechat_env_check.py`：第 1 步环境检查，只报事实。
+
+客户机安装：`pip install wxauto`（微信 3.x）或 `pip install wxauto4`（微信 4.x），微信登录后运行 runner。
