@@ -1,8 +1,8 @@
 {
-  "provider": "mock",
-  "base_url": "",
+  "provider": "openai_compatible",
+  "base_url": "https://apihub.agnes-ai.com/v1",
   "api_key_env": "LOVE_AGENT_API_KEY",
-  "model": "",
+  "model": "agnes-2.5-flash",
   "temperature": 0.3,
-  "note": "Set provider to openai_compatible and env LOVE_AGENT_API_KEY/LOVE_AGENT_BASE_URL/LOVE_AGENT_MODEL to use a real model. No key is stored in repo."
+  "note": "Real LLM provider."
 }

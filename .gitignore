@@ -1,3 +1,30 @@
+﻿# Personal data - contains user chat history and insights
+memory/people/
+memory/conversations/
+memory/relationships/
+memory/cards.json
+memory/*/
+
+# Python cache
 __pycache__/
 *.pyc
-memory/people/*/conversation_summary.json
+*.pyo
+*.pyd
+.Python
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Env
+.env
+.env.local

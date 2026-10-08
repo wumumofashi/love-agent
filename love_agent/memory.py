@@ -1,11 +1,11 @@
-from __future__ import annotations
+﻿from __future__ import annotations
 import json
 from pathlib import Path
 from datetime import datetime
 
 class PersonMemoryStore:
     """Per-person long-term memory. Tier D data, highest priority, never overwrite facts with guesses."""
-    FILES=["profile.json","preferences.json","relationship.json","important_events.json","conversation_summary.json","interaction_patterns.json","relationship_events.json"]
+    FILES=["profile.json","preferences.json","relationship.json","important_events.json","conversation_summary.json","interaction_patterns.json","relationship_events.json","insights.json"]
     def __init__(self, root: str|Path):
         self.root=Path(root)
     def person_dir(self, person_id: str) -> Path:
@@ -15,7 +15,7 @@ class PersonMemoryStore:
         defaults={
             "profile.json":{"person_id":person_id,"name":"","basic_info":{},"personality":[],"values":[],"work":"","family":""},
             "preferences.json":{"likes":[],"dislikes":[],"chat_style":"","triggers":[],"effective_replies":[],"negative_replies":[]},
-            "relationship.json":{"stage":"认识","stage_confidence":0.3,"dynamics":{},"commitments":[],"boundaries":[]},
+            "relationship.json":{"stage":"璁よ瘑","stage_confidence":0.3,"dynamics":{},"commitments":[],"boundaries":[]},
             "important_events.json":{"events":[]},
             "conversation_summary.json":{"summary":"","recent_topics":[],"last_updated":""},
             "interaction_patterns.json":{"patterns":[],"reply_rhythm":"","initiation_balance":"unknown"},
@@ -63,3 +63,50 @@ class PersonMemoryStore:
         ev["events"]=ev.get("events",[])[-200:]
         evp.write_text(json.dumps(ev,ensure_ascii=False,indent=2),encoding="utf-8")
         return {"person_id":person_id,"recorded_facts":observed_facts[:3],"summary_updated":True}
+
+    TAG_CATEGORIES = [
+        "work", "income", "location", "hobbies", "education",
+        "family", "relationship_history", "personality_detail",
+        "lifestyle", "values", "speech_style", "taboo_topics",
+        "dating_preference", "social_circle", "future_plans",
+        "health", "religious", "political", "other"
+    ]
+
+    def record_insight(self, person_id: str, tag: str, value: str, source: str = "conversation"):
+        """Tag and store a key fact about a person. Tags are auto-categorized."""
+        if tag not in self.TAG_CATEGORIES:
+            tag = "other"
+        self.ensure(person_id)
+        d=self.person_dir(person_id)
+        p=d/"insights.json"
+        if p.exists():
+            data=json.loads(p.read_text(encoding="utf-8"))
+        else:
+            data={"insights":[],"by_tag":{c:[] for c in self.TAG_CATEGORIES}}
+        insight={
+            "tag": tag,
+            "value": value,
+            "source": source,
+            "time": datetime.now().isoformat(timespec="seconds")
+        }
+        data["insights"].append(insight)
+        data["by_tag"].setdefault(tag, []).append(insight)
+        # Keep max 50 per tag
+        for k in data["by_tag"]:
+            data["by_tag"][k] = data["by_tag"][k][-50:]
+        data["insights"] = data["insights"][-200:]
+        p.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+        return {"person_id": person_id, "tag": tag, "value": value}
+
+    def get_insights(self, person_id: str, tag: str | None = None) -> dict:
+        """Retrieve tagged insights. If tag is None, return all."""
+        self.ensure(person_id)
+        d=self.person_dir(person_id)
+        p=d/"insights.json"
+        if not p.exists():
+            return {"insights":[], "by_tag":{}}
+        data=json.loads(p.read_text(encoding="utf-8"))
+        if tag:
+            return {"tag": tag, "insights": data.get("by_tag", {}).get(tag, [])}
+        return data
+
