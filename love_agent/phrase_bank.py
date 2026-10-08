@@ -32,7 +32,8 @@ class PhraseBank:
             if trig == 0.0:
                 continue  # an intent label alone is not a phrase-bank hit
             score = round(min(0.95, score + trig), 3)
+            exact_hit = any(content == t for t in e.get("triggers", []))
             hits.append({"id": e.get("id", ""), "label": "常用语句库", "text": e["text"],
-                         "intent": intent, "source": "phrase_bank", "bank_score": score})
-        hits.sort(key=lambda h: h["bank_score"], reverse=True)
+                         "intent": intent, "source": "phrase_bank", "bank_score": score, "exact": exact_hit})
+        hits.sort(key=lambda h: (h["bank_score"], h.get("exact", False)), reverse=True)
         return hits[:limit]

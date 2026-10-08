@@ -1,1 +1,1213 @@
-{"entries":[{"base":0.62,"id":"c_doing","intent":"continue","stages":[],"text":"刚忙完一阵，你呢？今天怎么样","triggers":["干嘛","在干什么","在吗"]},{"base":0.6,"id":"c_eaten","intent":"continue","stages":[],"text":"刚吃完，今天吃的还不错。你呢，吃了没","triggers":["吃了吗","吃了没","吃没吃"]},{"base":0.66,"exact":true,"id":"lp_um","intent":"low_pressure_reconnect","stages":["暧昧","追求","恋爱","认识","熟人"],"text":"嗯嗯，那你先忙，空了再说","triggers":["嗯"]},{"base":0.64,"exact":true,"id":"lp_umum","intent":"low_pressure_reconnect","stages":["暧昧","追求","恋爱","认识","熟人"],"text":"好，你先忙你的，不用特意回","triggers":["嗯嗯"]},{"base":0.64,"exact":true,"id":"lp_o","intent":"low_pressure_reconnect","stages":["暧昧","追求","恋爱","认识","熟人"],"text":"好，那就先这样，你忙完再说","triggers":["哦"]},{"base":0.62,"exact":true,"id":"lp_xingba","intent":"low_pressure_reconnect","stages":[],"text":"行，那就先按你说的来","triggers":["行吧"]},{"base":0.63,"exact":true,"id":"lp_meishi","intent":"low_pressure_reconnect","stages":[],"text":"行，那我就不多问了，你要是想说随时喊我","triggers":["没事"]},{"base":0.62,"exact":true,"id":"lp_suanle","intent":"low_pressure_reconnect","stages":[],"text":"行，先不纠结这个了，缓缓再说","triggers":["算了"]},{"base":0.6,"exact":true,"id":"lp_suini","intent":"low_pressure_reconnect","stages":[],"text":"好，那就先这样定，你想改再跟我说","triggers":["随你"]},{"base":0.62,"exact":true,"id":"lp_doukeyi","intent":"low_pressure_reconnect","stages":[],"text":"那我挑一个稳妥的，你到时候看合不合适","triggers":["都可以"]},{"base":0.63,"exact":true,"id":"lp_nimang","intent":"low_pressure_reconnect","stages":[],"text":"好，你先忙，我不打扰你了","triggers":["你忙你的"]},{"base":0.66,"id":"lp_generic","intent":"low_pressure_reconnect","stages":[],"text":"没事，你先忙你的。刚看到个有意思的，回头丢给你。","triggers":["忙","累","晚点","在忙"]},{"base":0.68,"id":"cf_tired","intent":"comfort","stages":[],"text":"听起来今天是真的累着了。你先缓缓，不用硬撑，我在呢。","triggers":["累","加班","烦","难受"]},{"base":0.64,"id":"cf_sad","intent":"comfort","stages":[],"text":"先别一个人扛着，我在听，你慢慢说","triggers":["难过","想哭","焦虑","崩溃"]},{"base":0.6,"id":"inv_weekend","intent":"invite","stages":["暧昧","追求","恋爱","熟人"],"text":"这周末你要是有空，一起去试试那家店？没空也没事，咱们再约。","triggers":["周末","出去","见面","吃饭"]},{"base":0.66,"id":"de_calm","intent":"de-escalate","stages":[],"text":"我先不争这个。等咱俩都平静点再说行吗？我不想越聊越冲。","triggers":["别说了","吵","烦死了"]},{"base":0.66,"id":"ap_own","intent":"own_and_repair","stages":[],"text":"这事是我的问题，我光顾着自己着急，没考虑你听着难受。对不起。","triggers":["对不起","你错了","生气"]},{"base":0.62,"id":"cl_mis","intent":"clarify","stages":[],"text":"怕你误会，我补一句：我不是在怪你，就是想把话说清楚。","triggers":["误会","不是那个意思","听我解释"]},{"base":0.6,"id":"j_clear","intent":"reassure_without_control","stages":["恋爱","稳定恋爱","暧昧"],"text":"这事我跟你说清楚，省得你瞎想。就是普通同事，那天是大家一起的。","triggers":["吃醋","那个男生","那个女生","她是谁","他是谁"]},{"base":0.7,"id":"m_ask","intent":"money_boundary","stages":[],"text":"你先跟我说下是啥情况，大概需要多少？我看完再回复你。","triggers":["借钱","转账","借我"]},{"base":0.68,"id":"ex_respect","intent":"respect_and_clarify","stages":[],"text":"好，我尊重你。这个决定我听到了，不会再缠着你问。","triggers":["分手","结束吧","别联系了","到此为止"]},{"base":0.66,"id":"ex_grace","intent":"graceful_exit","stages":[],"text":"明白，那我就不打扰了。祝你一切顺利。","triggers":["分手","别联系了"]},{"base":0.64,"id":"rc_slow","intent":"reconcile_careful","stages":[],"text":"我听到了。先别急着定，之前分开的那个问题，咱们得先说清楚。","triggers":["复合","重新开始","我们和好"]},{"base":0.62,"id":"w_thanks","intent":"warm_reciprocate","stages":[],"text":"你还记得这个啊，被你投喂得很开心。下次换我来。","triggers":["给你带","给你买","请你吃","记得你喜欢"]},{"base":0.58,"id":"s_share","intent":"respond_to_share","stages":[],"text":"这个看着就很舒服，你今天是专门去的还是路过拍的？","triggers":["好看","照片","图片","风景"]},{"base":0.58,"id":"f_flirt","intent":"light_flirt","stages":["暧昧","追求","恋爱"],"text":"你这样说，我会有点当真了啊。","triggers":["好看","帅","夸我"]},{"base":0.64,"id":"as_subtext","intent":"acknowledge_subtext","stages":[],"text":"你这句听着不像没事。是不是我刚哪里让你不舒服了？你直说就行。","triggers":["没事","不用管我","随便吧"]}],"note":"Tier C 常用语句库：按 reply_intent + 阶段 + 触发词命中，命中则直接用，不再调用大模型生成；命中语句仍必须过模拟与 Critic。base 为语句基础置信，最终分数由 意图/阶段/触发 匹配计算。"}
+{
+  "note": "Tier C 常用语句库：按 reply_intent + 阶段 + 触发词命中，命中直接用、不再调大模型生成；命中语句仍必须过模拟与 Critic。base 为基础置信，最终分数由意图/阶段/触发匹配计算。",
+  "entries": [
+    {
+      "id": "c_doing",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "干嘛",
+        "在干什么",
+        "在吗"
+      ],
+      "text": "刚忙完一阵，你呢？今天怎么样",
+      "base": 0.62
+    },
+    {
+      "id": "c_eaten",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "吃了吗",
+        "吃了没",
+        "吃没吃"
+      ],
+      "text": "刚吃完，今天吃的还不错。你呢，吃了没",
+      "base": 0.6
+    },
+    {
+      "id": "c_work",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "上班",
+        "下班",
+        "到家了吗"
+      ],
+      "text": "刚到家，今天这一天还挺满的。你呢，到家没",
+      "base": 0.58
+    },
+    {
+      "id": "c_weekend",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "周末干嘛",
+        "周末干啥",
+        "这周末"
+      ],
+      "text": "还没定，你有啥想法没？有我就跟着你混",
+      "base": 0.58
+    },
+    {
+      "id": "c_weather",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "下雨",
+        "好热",
+        "好冷",
+        "降温"
+      ],
+      "text": "今天这天气有点折腾，你出门注意点",
+      "base": 0.55
+    },
+    {
+      "id": "c_movie",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "电影",
+        "电视剧",
+        "综艺"
+      ],
+      "text": "你看的那个我还没看，好看吗？值不值得我追",
+      "base": 0.57
+    },
+    {
+      "id": "c_game",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "打游戏",
+        "游戏",
+        "开黑"
+      ],
+      "text": "你还在打啊，战绩咋样，赢了几把",
+      "base": 0.55
+    },
+    {
+      "id": "c_music",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "听歌",
+        "这首歌",
+        "演唱会"
+      ],
+      "text": "这首我也喜欢，你歌单品味一直在线",
+      "base": 0.56
+    },
+    {
+      "id": "c_pet",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "猫",
+        "狗",
+        "宠物"
+      ],
+      "text": "它这个表情也太好笑了，你平时没少逗它吧",
+      "base": 0.57
+    },
+    {
+      "id": "c_travel",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "旅游",
+        "出去玩",
+        "机票"
+      ],
+      "text": "听着就好玩，你这次打算玩几天",
+      "base": 0.56
+    },
+    {
+      "id": "c_morning",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "早安",
+        "早上好",
+        "起床了"
+      ],
+      "text": "早，今天起得还挺早，昨晚睡得咋样",
+      "base": 0.6
+    },
+    {
+      "id": "c_night",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "晚安",
+        "睡了",
+        "睡觉了"
+      ],
+      "text": "好，你早点睡，我也准备收拾收拾了",
+      "base": 0.6
+    },
+    {
+      "id": "c_miss",
+      "intent": "continue",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "想我",
+        "想你了"
+      ],
+      "text": "被你这么一说，我还真有点",
+      "base": 0.58
+    },
+    {
+      "id": "c_boring",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "无聊",
+        "好无聊"
+      ],
+      "text": "无聊就对了，我也正发呆呢，聊会天不",
+      "base": 0.58
+    },
+    {
+      "id": "c_news",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "你看新闻",
+        "热搜",
+        "听说没"
+      ],
+      "text": "我刚也刷到了，你觉得这事靠谱吗",
+      "base": 0.54
+    },
+    {
+      "id": "m_busy_ok",
+      "intent": "maintain",
+      "stages": [],
+      "triggers": [
+        "我忙完了",
+        "忙完了"
+      ],
+      "text": "辛苦了，忙完就好好吃个饭，别凑合",
+      "base": 0.57
+    },
+    {
+      "id": "m_report",
+      "intent": "maintain",
+      "stages": [],
+      "triggers": [
+        "到家了",
+        "我到啦",
+        "安全到家"
+      ],
+      "text": "到就行，洗洗早点休息",
+      "base": 0.58
+    },
+    {
+      "id": "m_sick_care",
+      "intent": "maintain",
+      "stages": [],
+      "triggers": [
+        "不舒服",
+        "头疼",
+        "感冒",
+        "发烧"
+      ],
+      "text": "严不严重？先吃药多喝水，不行就去医院别硬扛",
+      "base": 0.62
+    },
+    {
+      "id": "m_exam",
+      "intent": "maintain",
+      "stages": [],
+      "triggers": [
+        "考试",
+        "面试",
+        "汇报"
+      ],
+      "text": "别紧张，正常发挥就行，等你好消息",
+      "base": 0.58
+    },
+    {
+      "id": "m_drive",
+      "intent": "maintain",
+      "stages": [],
+      "triggers": [
+        "开车",
+        "在路上",
+        "堵车"
+      ],
+      "text": "你专心开，到地方了再跟我说话",
+      "base": 0.58
+    },
+    {
+      "id": "g_job",
+      "intent": "get_to_know",
+      "stages": [
+        "认识",
+        "普通朋友",
+        "熟人"
+      ],
+      "triggers": [
+        "你做什么工作",
+        "你的工作"
+      ],
+      "text": "我做这行主要是……你呢，你是自己喜欢才选的这行吗",
+      "base": 0.55
+    },
+    {
+      "id": "g_hobby",
+      "intent": "get_to_know",
+      "stages": [
+        "认识",
+        "普通朋友",
+        "熟人"
+      ],
+      "triggers": [
+        "平时喜欢",
+        "有什么爱好",
+        "周末一般"
+      ],
+      "text": "听得出来你挺会安排自己时间的，我平时就比较宅",
+      "base": 0.55
+    },
+    {
+      "id": "g_hometown",
+      "intent": "get_to_know",
+      "stages": [
+        "认识",
+        "普通朋友"
+      ],
+      "triggers": [
+        "哪里人",
+        "老家"
+      ],
+      "text": "那边我去过一次，吃的挺合我胃口的，你最想念哪口",
+      "base": 0.55
+    },
+    {
+      "id": "g_no户口",
+      "intent": "get_to_know",
+      "stages": [
+        "认识"
+      ],
+      "triggers": [
+        "有房吗",
+        "有车吗",
+        "工资"
+      ],
+      "text": "这些后面慢慢聊呗，我更想先知道你平时是个什么样的人",
+      "base": 0.58
+    },
+    {
+      "id": "lp_um",
+      "intent": "low_pressure_reconnect",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "嗯"
+      ],
+      "text": "嗯嗯，那你先忙，空了再说",
+      "base": 0.66,
+      "exact": true
+    },
+    {
+      "id": "lp_umum",
+      "intent": "low_pressure_reconnect",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "嗯嗯"
+      ],
+      "text": "好，你先忙你的，不用特意回",
+      "base": 0.64,
+      "exact": true
+    },
+    {
+      "id": "lp_o",
+      "intent": "low_pressure_reconnect",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "哦"
+      ],
+      "text": "好，那就先这样，你忙完再说",
+      "base": 0.64,
+      "exact": true
+    },
+    {
+      "id": "lp_xingba",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "行吧"
+      ],
+      "text": "行，那就先按你说的来",
+      "base": 0.62,
+      "exact": true
+    },
+    {
+      "id": "lp_meishi",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "没事"
+      ],
+      "text": "行，那我就不多问了，你要是想说随时喊我",
+      "base": 0.63,
+      "exact": true
+    },
+    {
+      "id": "lp_suanle",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "算了"
+      ],
+      "text": "行，先不纠结这个了，缓缓再说",
+      "base": 0.62,
+      "exact": true
+    },
+    {
+      "id": "lp_suini",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "随你"
+      ],
+      "text": "好，那就先这样定，你想改再跟我说",
+      "base": 0.6,
+      "exact": true
+    },
+    {
+      "id": "lp_doukeyi",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "都可以"
+      ],
+      "text": "那我挑一个稳妥的，你到时候看合不合适",
+      "base": 0.62,
+      "exact": true
+    },
+    {
+      "id": "lp_nimang",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "你忙你的"
+      ],
+      "text": "好，你先忙，我不打扰你了",
+      "base": 0.63,
+      "exact": true
+    },
+    {
+      "id": "lp_generic",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "忙",
+        "累",
+        "晚点",
+        "在忙"
+      ],
+      "text": "没事，你先忙你的。刚看到个有意思的，回头丢给你。",
+      "base": 0.66
+    },
+    {
+      "id": "lp_ok",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "好吧"
+      ],
+      "text": "好，那就先这么定，有变化你喊我",
+      "base": 0.6,
+      "exact": true
+    },
+    {
+      "id": "lp_hehe",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "呵呵"
+      ],
+      "text": "行，那先不聊这个了",
+      "base": 0.58,
+      "exact": true
+    },
+    {
+      "id": "lp_zai",
+      "intent": "low_pressure_reconnect",
+      "stages": [],
+      "triggers": [
+        "在吗"
+      ],
+      "text": "在的，你说",
+      "base": 0.6,
+      "exact": true
+    },
+    {
+      "id": "w_share",
+      "intent": "wait_or_light_ping",
+      "stages": [],
+      "triggers": [
+        "没回",
+        "不回"
+      ],
+      "text": "刚刷到一个你可能会笑的，先存着，你忙完再看",
+      "base": 0.58
+    },
+    {
+      "id": "cf_tired",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "累",
+        "加班",
+        "烦",
+        "难受"
+      ],
+      "text": "听起来今天是真的累着了。你先缓缓，不用硬撑，我在呢。",
+      "base": 0.68
+    },
+    {
+      "id": "cf_sad",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "难过",
+        "想哭",
+        "焦虑",
+        "崩溃"
+      ],
+      "text": "先别一个人扛着，我在听，你慢慢说",
+      "base": 0.64
+    },
+    {
+      "id": "cf_work_bad",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "被骂",
+        "被领导",
+        "工作不顺",
+        "委屈"
+      ],
+      "text": "这事换谁都憋屈，你先缓缓，愿意说我听着",
+      "base": 0.63
+    },
+    {
+      "id": "cf_fail",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "搞砸了",
+        "没考好",
+        "失败了",
+        "没过"
+      ],
+      "text": "一次没成不代表你不行，先歇会，咱再慢慢想办法",
+      "base": 0.62
+    },
+    {
+      "id": "cf_sick",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "生病",
+        "难受",
+        "不舒服"
+      ],
+      "text": "先好好休息，别的都往后放，有啥需要我做的你直接说",
+      "base": 0.63
+    },
+    {
+      "id": "cf_lonely",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "一个人",
+        "没人陪",
+        "孤单"
+      ],
+      "text": "那我陪你聊会，不用非得聊什么正经的",
+      "base": 0.6
+    },
+    {
+      "id": "cf_insomnia",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "睡不着",
+        "失眠"
+      ],
+      "text": "睡不着就别逼自己，我陪你说会话，困了你就睡",
+      "base": 0.6
+    },
+    {
+      "id": "w_thanks",
+      "intent": "warm_reciprocate",
+      "stages": [],
+      "triggers": [
+        "给你带",
+        "给你买",
+        "请你吃",
+        "记得你喜欢"
+      ],
+      "text": "你还记得这个啊，被你投喂得很开心。下次换我来。",
+      "base": 0.62
+    },
+    {
+      "id": "w_gift",
+      "intent": "warm_reciprocate",
+      "stages": [],
+      "triggers": [
+        "礼物",
+        "送你的",
+        "给你的"
+      ],
+      "text": "你这也太用心了，我得想想怎么回你一份",
+      "base": 0.6
+    },
+    {
+      "id": "w_compliment_back",
+      "intent": "warm_reciprocate",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "你真好",
+        "你人真好"
+      ],
+      "text": "被你夸得有点飘了啊，不过我收下了",
+      "base": 0.59
+    },
+    {
+      "id": "f_flirt",
+      "intent": "light_flirt",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "好看",
+        "帅",
+        "夸我"
+      ],
+      "text": "你这样说，我会有点当真了啊。",
+      "base": 0.58
+    },
+    {
+      "id": "f_dream",
+      "intent": "light_flirt",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "梦到你",
+        "梦见"
+      ],
+      "text": "那我昨晚在你梦里表现还行吗",
+      "base": 0.57
+    },
+    {
+      "id": "f_miss_u",
+      "intent": "light_flirt",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "想你",
+        "想见你"
+      ],
+      "text": "那找个时间见一面，光聊多没意思",
+      "base": 0.58
+    },
+    {
+      "id": "f_cute",
+      "intent": "light_flirt",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "你真可爱",
+        "好可爱"
+      ],
+      "text": "你再夸，我可就骄傲了",
+      "base": 0.56
+    },
+    {
+      "id": "f_marry_joke",
+      "intent": "light_flirt",
+      "stages": [
+        "恋爱",
+        "稳定恋爱"
+      ],
+      "triggers": [
+        "娶我",
+        "嫁给我"
+      ],
+      "text": "你这话我先记下了，回头可是要兑现的",
+      "base": 0.55
+    },
+    {
+      "id": "inv_weekend",
+      "intent": "invite",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "周末",
+        "出去",
+        "见面",
+        "吃饭"
+      ],
+      "text": "这周末你要是有空，一起去试试那家店？没空也没事，咱们再约。",
+      "base": 0.6
+    },
+    {
+      "id": "inv_coffee",
+      "intent": "invite",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "咖啡",
+        "奶茶",
+        "下午茶"
+      ],
+      "text": "那找个下午一起去坐坐，我请你喝一杯",
+      "base": 0.58
+    },
+    {
+      "id": "inv_walk",
+      "intent": "invite",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "散步",
+        "夜景",
+        "江边"
+      ],
+      "text": "晚上要不要出去走走，这个点外面应该挺舒服的",
+      "base": 0.57
+    },
+    {
+      "id": "inv_confirm",
+      "intent": "invite",
+      "stages": [],
+      "triggers": [
+        "明天见",
+        "几点见",
+        "在哪见"
+      ],
+      "text": "行，那就明天老地方，我提前十分钟到",
+      "base": 0.6
+    },
+    {
+      "id": "inv_cancel",
+      "intent": "invite",
+      "stages": [],
+      "triggers": [
+        "去不了",
+        "没空",
+        "下次吧"
+      ],
+      "text": "没事，那咱们改天，你定时间就行",
+      "base": 0.6
+    },
+    {
+      "id": "inv_movie",
+      "intent": "invite",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "看电影",
+        "新上的"
+      ],
+      "text": "正好有部新上的，你感兴趣咱就去看，不感兴趣就换别的",
+      "base": 0.57
+    },
+    {
+      "id": "s_share",
+      "intent": "respond_to_share",
+      "stages": [],
+      "triggers": [
+        "好看",
+        "照片",
+        "图片",
+        "风景"
+      ],
+      "text": "这个看着就很舒服，你今天是专门去的还是路过拍的？",
+      "base": 0.58
+    },
+    {
+      "id": "s_food",
+      "intent": "respond_to_share",
+      "stages": [],
+      "triggers": [
+        "好吃",
+        "美食",
+        "火锅",
+        "烧烤"
+      ],
+      "text": "看着就馋人，这家在哪，下次带我去",
+      "base": 0.59
+    },
+    {
+      "id": "s_selfie",
+      "intent": "respond_to_share",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "自拍",
+        "照片给你"
+      ],
+      "text": "这张好看，今天状态很在线啊",
+      "base": 0.59
+    },
+    {
+      "id": "s_work_share",
+      "intent": "respond_to_share",
+      "stages": [],
+      "triggers": [
+        "做完了",
+        "完成了",
+        "搞定了"
+      ],
+      "text": "可以啊，这事被你拿下了，今晚得犒劳自己一下",
+      "base": 0.58
+    },
+    {
+      "id": "s_child_pet",
+      "intent": "respond_to_share",
+      "stages": [],
+      "triggers": [
+        "宝宝",
+        "孩子",
+        "我家猫",
+        "我家狗"
+      ],
+      "text": "它也太可爱了，你这天天看着心情能不好吗",
+      "base": 0.57
+    },
+    {
+      "id": "de_calm",
+      "intent": "de-escalate",
+      "stages": [],
+      "triggers": [
+        "别说了",
+        "吵",
+        "烦死了"
+      ],
+      "text": "我先不争这个。等咱俩都平静点再说行吗？我不想越聊越冲。",
+      "base": 0.66
+    },
+    {
+      "id": "de_listen",
+      "intent": "de-escalate",
+      "stages": [],
+      "triggers": [
+        "你根本",
+        "你总是",
+        "你从来"
+      ],
+      "text": "你先说，我听完，不打断你",
+      "base": 0.62
+    },
+    {
+      "id": "de_pause",
+      "intent": "de-escalate",
+      "stages": [],
+      "triggers": [
+        "不想谈",
+        "别问了"
+      ],
+      "text": "行，那就先停在这，你想谈的时候我都在",
+      "base": 0.62
+    },
+    {
+      "id": "ap_own",
+      "intent": "own_and_repair",
+      "stages": [],
+      "triggers": [
+        "对不起",
+        "你错了",
+        "生气"
+      ],
+      "text": "这事是我的问题，我光顾着自己着急，没考虑你听着难受。对不起。",
+      "base": 0.66
+    },
+    {
+      "id": "ap_late_reply",
+      "intent": "own_and_repair",
+      "stages": [],
+      "triggers": [
+        "不回消息",
+        "回这么慢",
+        "已读不回"
+      ],
+      "text": "是我回晚了，让你等着急了，下次忙之前我先跟你说一声",
+      "base": 0.62
+    },
+    {
+      "id": "ap_forgot",
+      "intent": "own_and_repair",
+      "stages": [],
+      "triggers": [
+        "你忘了",
+        "记性"
+      ],
+      "text": "这事赖我，记性太差，我现在就记手机备忘录里",
+      "base": 0.6
+    },
+    {
+      "id": "ap_make_up",
+      "intent": "own_and_repair",
+      "stages": [
+        "恋爱",
+        "稳定恋爱"
+      ],
+      "triggers": [
+        "怎么补偿",
+        "哄我"
+      ],
+      "text": "那今晚你说了算，你想吃啥想干啥我都陪着",
+      "base": 0.6
+    },
+    {
+      "id": "cl_mis",
+      "intent": "clarify",
+      "stages": [],
+      "triggers": [
+        "误会",
+        "不是那个意思",
+        "听我解释"
+      ],
+      "text": "怕你误会，我补一句：我不是在怪你，就是想把话说清楚。",
+      "base": 0.62
+    },
+    {
+      "id": "cl_joke",
+      "intent": "clarify",
+      "stages": [],
+      "triggers": [
+        "开玩笑",
+        "逗你"
+      ],
+      "text": "我是逗你的啊，看你还当真了",
+      "base": 0.57
+    },
+    {
+      "id": "j_clear",
+      "intent": "reassure_without_control",
+      "stages": [
+        "恋爱",
+        "稳定恋爱",
+        "暧昧"
+      ],
+      "triggers": [
+        "吃醋",
+        "那个男生",
+        "那个女生",
+        "她是谁",
+        "他是谁"
+      ],
+      "text": "这事我跟你说清楚，省得你瞎想。就是普通同事，那天是大家一起的。",
+      "base": 0.6
+    },
+    {
+      "id": "j_report",
+      "intent": "reassure_without_control",
+      "stages": [
+        "恋爱",
+        "稳定恋爱"
+      ],
+      "triggers": [
+        "去哪了",
+        "跟谁",
+        "这么晚"
+      ],
+      "text": "我刚跟朋友吃个饭，已经在往回走了，到了跟你说",
+      "base": 0.6
+    },
+    {
+      "id": "j_only",
+      "intent": "reassure_without_control",
+      "stages": [
+        "恋爱",
+        "稳定恋爱"
+      ],
+      "triggers": [
+        "是不是喜欢",
+        "别人"
+      ],
+      "text": "我心里有数，你别自己吓自己，咱俩好好的",
+      "base": 0.58
+    },
+    {
+      "id": "as_subtext",
+      "intent": "acknowledge_subtext",
+      "stages": [],
+      "triggers": [
+        "没事",
+        "不用管我",
+        "随便吧"
+      ],
+      "text": "你这句听着不像没事。是不是我刚哪里让你不舒服了？你直说就行。",
+      "base": 0.64
+    },
+    {
+      "id": "as_cold",
+      "intent": "acknowledge_subtext",
+      "stages": [],
+      "triggers": [
+        "哦哦",
+        "嗯哦",
+        "知道了"
+      ],
+      "text": "感觉你今天兴致不太高，是累了吗",
+      "base": 0.58
+    },
+    {
+      "id": "as_test",
+      "intent": "acknowledge_subtext",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "我要是",
+        "如果我"
+      ],
+      "text": "你是不是想问什么，你直说，我不绕弯子",
+      "base": 0.56
+    },
+    {
+      "id": "m_ask",
+      "intent": "money_boundary",
+      "stages": [],
+      "triggers": [
+        "借钱",
+        "转账",
+        "借我"
+      ],
+      "text": "你先跟我说下是啥情况，大概需要多少？我看完再回复你。",
+      "base": 0.7
+    },
+    {
+      "id": "m_refuse_soft",
+      "intent": "money_boundary",
+      "stages": [],
+      "triggers": [
+        "借点",
+        "周转",
+        "急用钱"
+      ],
+      "text": "不是我不帮，我最近手头也紧，这个真拿不出来，你再问问别人看",
+      "base": 0.62
+    },
+    {
+      "id": "m_installment",
+      "intent": "money_boundary",
+      "stages": [],
+      "triggers": [
+        "还钱",
+        "欠的"
+      ],
+      "text": "不着急，你手头宽裕了再说，我信你",
+      "base": 0.58
+    },
+    {
+      "id": "ex_respect",
+      "intent": "respect_and_clarify",
+      "stages": [],
+      "triggers": [
+        "分手",
+        "结束吧",
+        "别联系了",
+        "到此为止"
+      ],
+      "text": "好，我尊重你。这个决定我听到了，不会再缠着你问。",
+      "base": 0.68
+    },
+    {
+      "id": "ex_clarify_calm",
+      "intent": "respect_and_clarify",
+      "stages": [],
+      "triggers": [
+        "我们分开",
+        "不合适"
+      ],
+      "text": "你要是想好了，我尊重。能不能最后把话说清楚，我不想留一堆问号",
+      "base": 0.6
+    },
+    {
+      "id": "ex_grace",
+      "intent": "graceful_exit",
+      "stages": [],
+      "triggers": [
+        "分手",
+        "别联系了"
+      ],
+      "text": "明白，那我就不打扰了。祝你一切顺利。",
+      "base": 0.66
+    },
+    {
+      "id": "rc_slow",
+      "intent": "reconcile_careful",
+      "stages": [],
+      "triggers": [
+        "复合",
+        "重新开始",
+        "我们和好"
+      ],
+      "text": "我听到了。先别急着定，之前分开的那个问题，咱们得先说清楚。",
+      "base": 0.64
+    },
+    {
+      "id": "rc_miss",
+      "intent": "reconcile_careful",
+      "stages": [],
+      "triggers": [
+        "还想我",
+        "忘不了"
+      ],
+      "text": "我也想过很多。复合不是不行，但老问题不解决，回去还是会吵",
+      "base": 0.6
+    },
+    {
+      "id": "lt_future",
+      "intent": "maintain",
+      "stages": [
+        "恋爱",
+        "稳定恋爱"
+      ],
+      "triggers": [
+        "以后",
+        "未来",
+        "结婚"
+      ],
+      "text": "以后的事咱慢慢来，先把眼前的日子过好，我是认真的",
+      "base": 0.58
+    },
+    {
+      "id": "lt_family",
+      "intent": "maintain",
+      "stages": [
+        "恋爱",
+        "稳定恋爱"
+      ],
+      "triggers": [
+        "你爸妈",
+        "我爸妈",
+        "见家长"
+      ],
+      "text": "见家长我没问题，提前跟我说，我好准备一下",
+      "base": 0.57
+    },
+    {
+      "id": "lt_money_plan",
+      "intent": "maintain",
+      "stages": [
+        "恋爱",
+        "稳定恋爱"
+      ],
+      "triggers": [
+        "存钱",
+        "买房",
+        "工资上交"
+      ],
+      "text": "咱俩的钱怎么安排都好商量，透明点就行，别藏着掖着",
+      "base": 0.57
+    },
+    {
+      "id": "c_accept_apology",
+      "intent": "continue",
+      "stages": [],
+      "triggers": [
+        "对不起",
+        "不好意思",
+        "抱歉"
+      ],
+      "text": "没事，我知道你不是故意的，别放在心上",
+      "base": 0.6
+    },
+    {
+      "id": "c_missed_you",
+      "intent": "continue",
+      "stages": [
+        "暧昧",
+        "追求",
+        "恋爱"
+      ],
+      "triggers": [
+        "好久没聊",
+        "想跟你聊",
+        "好久不见"
+      ],
+      "text": "我也正想找你呢，最近忙什么去了",
+      "base": 0.57
+    },
+    {
+      "id": "cf_sleep_early",
+      "intent": "comfort",
+      "stages": [],
+      "triggers": [
+        "熬夜",
+        "通宵",
+        "没睡好"
+      ],
+      "text": "你这作息得调调了，今晚早点睡，我盯着你",
+      "base": 0.58
+    },
+    {
+      "id": "m_payback_ask",
+      "intent": "money_boundary",
+      "stages": [],
+      "triggers": [
+        "什么时候还",
+        "还钱的事"
+      ],
+      "text": "我最近也有点紧，你方便的话先还一部分也行",
+      "base": 0.58
+    }
+  ]
+}

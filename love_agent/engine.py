@@ -38,7 +38,7 @@ REJECT=["别联系","不想聊","有男朋友","有女朋友","不合适","别�
 BREAKUP=["分手","结束吧","过不下去了","离婚"]
 CONFLICT=["你总是","你从来","吵","生气","凭什么","受够了"]
 JEALOUS=["那个男生是谁","那个女生是谁","吃醋","你跟他","你跟她"]
-MONEY=["借钱","转账","红包","多少钱","付款"]
+MONEY=["借钱","借我","周转","转账","红包","多少钱","付款"]
 
 class LoveAgentEngine:
     def __init__(self, project_root: str|Path|None=None, config: dict|None=None):
@@ -168,8 +168,15 @@ class LoveAgentEngine:
             # through simulate+critic below. Only a miss calls the LLM generate.
             bank_hits=[]
             if self.config.get("phrase_bank_enabled", True):
-                bank_hits=[h for h in self.phrase_bank.match(ctx.get("reply_intent",""), stage, text)
-                           if h["bank_score"] >= float(self.config.get("phrase_bank_min_score", 0.78))]
+                _min=float(self.config.get("phrase_bank_min_score", 0.78))
+                bank_hits=[h for h in self.phrase_bank.match(ctx.get("reply_intent",""), stage, text) if h["bank_score"] >= _min]
+                if not bank_hits:  # pre-classifier flags may name the scene more reliably than a weak strategist
+                    _flag_intent={"money":"money_boundary","breakup":"respect_and_clarify","rejection":"respect_and_clarify","conflict":"de-escalate","jealousy":"reassure_without_control","reconcile":"reconcile_careful"}
+                    for _f in flags:
+                        _alt=_flag_intent.get(_f)
+                        if _alt and _alt != ctx.get("reply_intent",""):
+                            bank_hits=[h for h in self.phrase_bank.match(_alt, stage, text) if h["bank_score"] >= _min]
+                            if bank_hits: ctx["phrase_bank_intent_source"]="pre_flags:"+_f; break
             if bank_hits:
                 cands=bank_hits; ctx["generate_source"]="phrase_bank"
                 ctx["phrase_bank_hits"]=bank_hits; llm_calls.append("generate")
