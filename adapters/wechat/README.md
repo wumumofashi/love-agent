@@ -22,7 +22,7 @@
 
 ## 2026-10-09 更新：生产传输层改选 wxauto（对接完成）
 
-调研结论（GitHub 实测）：个人微信自动回复最成熟的对接层是 **cluic/wxauto**（约 7.4k stars，Apache-2.0，2026 年仍在推送），直接驱动 Windows 微信客户端收发，不碰网页协议、不需要解密数据库，客户侧部署最轻。Wechaty（23k stars）依赖 puppet（padlocal 等）收费且不稳；CowAgent（47k stars，前 chatgpt-on-wechat）是整套 Agent 框架而非传输层，接进来会喧宾夺主；LearnLove 的 DB 路线保留为重型备选。
+调研结论（GitHub 实测，2026-10-09 更正）：**cluic/wxauto**（约 7.4k stars，Apache-2.0）代码已于 2026 年 2 月停止维护（最后代码提交为「停止维护」，之后只有 README 修改；wxauto4 也已停更）——此前「2026 年仍在推送」的说法是被仓库元数据误导，特此更正。它目前仍可驱动微信客户端，但微信改版后可能无人修复；真正持续维护的是 **CowAgent**（47k stars，MIT，2026-10-08 仍有 weixin 渠道代码提交）。wxauto 在此保留为可用的冻结传输层，主力路线建议改走 CowAgent 集成，待用户拍板。，直接驱动 Windows 微信客户端收发，不碰网页协议、不需要解密数据库，客户侧部署最轻。Wechaty（23k stars）依赖 puppet（padlocal 等）收费且不稳；CowAgent（47k stars，前 chatgpt-on-wechat）是整套 Agent 框架而非传输层，接进来会喧宾夺主；LearnLove 的 DB 路线保留为重型备选。
 
 已对接：
 - `wxauto_adapter.py`：`WxAutoWeChatAdapter`（receive 归一化、listen、send、monitor），非 Windows 或未装 wxauto 时明确报错，不假装接通。

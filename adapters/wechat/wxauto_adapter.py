@@ -1,8 +1,14 @@
 """WxAuto adapter: the chosen production WeChat transport for love-agent.
 
 Why wxauto (surveyed 2026-10-09):
-- cluic/wxauto: ~7.4k GitHub stars, Apache-2.0, actively maintained; works on
-  the official Windows WeChat client (no web-protocol, no DB decryption).
+- cluic/wxauto: ~7.4k GitHub stars, Apache-2.0; works on the official Windows
+  WeChat client (no web-protocol, no DB decryption). CORRECTION (2026-10-09):
+  upstream code maintenance stopped in Feb 2026 (final code commit is literally
+  '停止维护'; only README edits after). It still works against current clients
+  but WeChat UI changes may break it without upstream fixes. Treat as a
+  working-but-frozen transport; CowAgent (actively maintained) is the safer
+  primary route. This note replaces an earlier 'actively maintained' claim
+  that was based on repo metadata timestamps, not code commits.
 - Alternatives rejected: Wechaty (23k stars) needs puppets (padlocal) that are
   paid/fragile for personal accounts; CowAgent (47k stars, ex chatgpt-on-wechat)
   is a whole competing agent framework, not a transport layer; LearnLove (kept
