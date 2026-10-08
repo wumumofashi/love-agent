@@ -5,7 +5,7 @@ PASS 04_ambiguous_flirt 暧昧 stage=暧昧 conf=0.73 decision=needs_confirmatio
 PASS 05_proactive_goodwill 主动示好 stage=追求 conf=0.73 decision=needs_confirmation final='你还记得这个啊，被你投喂得很开心。下次换我来。' errs=[]
 PASS 06_rejection 拒绝 stage=追求 conf=0.73 decision=needs_confirmation final='明白，那我就不打扰了。祝你一切顺利。' errs=[]
 PASS 07_date 约会 stage=暧昧 conf=0.73 decision=needs_confirmation final='这周末你要是有空，一起去试试那家店？没空也没事，咱们再约。' errs=[]
-PASS 08_fight 吵架 stage=冲突 conf=0.76 decision=needs_confirmation final='你先说，我听完，不打断你' errs=[]
+PASS 08_fight 吵架 stage=冲突 conf=0.76 decision=needs_confirmation final='我比谁都清楚你的好，有时候就是控制不住闹小脾气，我只是想让你多在乎我一点。' errs=[]
 PASS 09_misunderstanding 误会 stage=恋爱 conf=0.73 decision=needs_confirmation final='怕你误会，我补一句：我不是在怪你，就是想把话说清楚。' errs=[]
 PASS 10_jealousy 吃醋 stage=恋爱 conf=0.73 decision=needs_confirmation final='这事我跟你说清楚，省得你瞎想。就是普通同事，那天是大家一起的。' errs=[]
 PASS 11_apology 道歉场景 stage=恋爱 conf=0.73 decision=needs_confirmation final='这事是我的问题，我光顾着自己着急，没考虑你听着难受。对不起。' errs=[]
