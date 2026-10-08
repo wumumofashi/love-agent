@@ -1,0 +1,6 @@
+rapidocr-onnxruntime
+pillow
+numpy
+psutil
+pyperclip
+requests

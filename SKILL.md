@@ -71,7 +71,7 @@ export LOVE_AGENT_API_KEY="sk-..."
 
 本技能可作为微信聊天技能供客户使用。宿主 Agent 必须带客户**按顺序**走完以下 7 步，缺一步不开工（宿主大脑模式与 CLI 模式都适用，CLI 命令见下）：
 
-1. **配置微信环境**：确认客户在 Windows 电脑上已登录微信；生产环境走 LearnLove 路线（微信 DB 解密、约 2 秒轮询监听、阀门 L1、剪贴板/pyautogui 发送，见 `adapters/wechat/README.md`）。环境没就绪之前只做分析和建议，不得声称已接通微信。生产传输：在**客户本人微信**里与对方收发的路线是 wxauto UI 自动化（见 `adapters/wechat/wxauto_adapter.py` 与 `runner.py`，真实发送需 `--live`）；wxauto 上游已停更（2026-02），可 vendor 其源码由本项目自维护（Apache-2.0 允许）。环境检查：`python3 scripts/wechat_env_check.py`。CowAgent 的 weixin 是 ilink 机器人渠道——客户和一个机器人账号对话（同豆包类工作台），**不是**在客户个人微信里替客户回复联系人，只适合「咨询机器人」形态（integrations/cowagent 保留为该形态备选）；LearnLove（DB 路线，仍在维护）为重型备选，见 adapters/wechat/README.md。
+1. **配置微信环境**：确认客户在 Windows 电脑上已登录微信；生产环境走 LearnLove 路线（微信 DB 解密、约 2 秒轮询监听、阀门 L1、剪贴板/pyautogui 发送，见 `adapters/wechat/README.md`）。环境没就绪之前只做分析和建议，不得声称已接通微信。生产传输（在**客户本人微信**里与对方收发）：`adapters/wechat/vision/` 视觉传输层——源自 Luofeng-Cloud/WeChat-AI-AutoReply（MIT，已 vendor 进本仓库自维护）+ `love_agent_bridge.py` 把其回复生成替换为 love-agent 引擎决策。Windows + 微信 3.x/4.x 登录后运行 `wechat_vision_bot.py`；配置 `wechat_config_dev.json` 的白名单即聊天对象，`loveagent.chats` 设 person_id/三模式/人设/阶段；suggest/confirm 永不发送（建议进 outbox），autopilot 仅 auto_send 且 `loveagent.live=true` 才真发（默认 false）。环境检查：`python3 scripts/wechat_env_check.py`（wxauto 路线为备选，其上游已停更；CowAgent 的 weixin 是 ilink 机器人对话形态，非本人微信回复，仅作咨询机器人备选，见 adapters/wechat/README.md）。
 2. **确定聊天对象**：向客户确认正在聊的是谁，为其建立独立人物档案 `memory/people/<person_id>/`；不同对象必须不同 person_id，档案严格隔离，禁止把 A 的记忆用到 B 身上。
 3. **导入聊天记录**：有历史记录时导入该对象的档案，作为关系判断和「最近聊天」依据——CLI：`python3 bin/love_agent.py --person-id <id> --import-history 聊天记录.txt`（.txt 每行一条，或 .json 的 messages 数组）。导入内容只进这个人的档案。
 4. **没有聊天记录时定阶段**：让客户自己填写当前关系阶段（陌生/认识/普通朋友/熟人/暧昧/追求/恋爱/稳定恋爱/冲突/婚姻）——CLI：`--set-stage 暧昧`。此阶段为客户自述证据，后续判断仍要给 confidence 和备选阶段，不强行定性。

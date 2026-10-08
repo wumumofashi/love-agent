@@ -1,0 +1,13 @@
+{
+  "whitelist_mode": true,
+  "whitelist": ["对方备注名"],
+  "blacklist": ["文件传输助手", "微信团队", "腾讯新闻", "微信支付", "服务通知", "订阅号消息"],
+  "check_interval_seconds": 0.5,
+  "loveagent": {
+    "live": false,
+    "outbox": "love_agent_outbox.jsonl",
+    "chats": {
+      "对方备注名": {"person_id": "person_001", "mode": "confirm", "persona": "幽默、直接、不卑不亢", "stage": "暧昧"}
+    }
+  }
+}
