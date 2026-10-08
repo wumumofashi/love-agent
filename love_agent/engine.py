@@ -12,6 +12,7 @@ from reply.simulator import simulate
 from reply.critic import critique, revise
 from multimodal.vision import describe_image
 from multimodal.audio import transcribe_voice, video_frames
+from llm.provider import load_provider, LLMUnavailable
 
 DEFAULT_CONFIG={"autopilot_min_confidence":0.85,"confirm_min_confidence":0.60,"max_auto_risk":0.35,"sensitive_topics":FORBIDDEN_AUTO_TOPICS}
 
@@ -53,8 +54,16 @@ class LoveAgentEngine:
         ctx["user_goal"]=raw.get("user_goal","")
         person_id=raw.get("person_id","person_001")
         mem=self.memory.load(person_id)
-        person={"person_id":person_id, **(raw.get("person") or {}), **(mem.get("profile") or {})}
-        ctx["person"]=person
+        person={"person_id":person_id, **(mem.get("profile") or {}),
+                "preferences": mem.get("preferences") or {},
+                "relationship": mem.get("relationship") or {},
+                "interaction_patterns": mem.get("interaction_patterns") or {},
+                "relationship_events": mem.get("relationship_events") or {}}
+        raw_person=raw.get("person") or {}
+        for k,v in raw_person.items():
+            if isinstance(v,dict) and isinstance(person.get(k),dict): person[k]={**person[k], **v}
+            else: person[k]=v
+        ctx["person"]=person; ctx["person_memory"]=mem
         ctx["recent_context"]=raw.get("recent_context","") or (mem.get("conversation_summary") or {}).get("summary","")
         ctx["recent_sent_texts"]=raw.get("recent_sent_texts",[])
         mm=self.observe(raw); ctx["multimodal"]=mm
@@ -88,38 +97,94 @@ class LoveAgentEngine:
         if "passive_aggressive" in flags: emo="不满/试探"
         ctx["emotional_state"]={"primary":emo,"intensity":0.7 if emo!="平静" else 0.3}
         ctx["relationship_dynamics"]={"flags":flags,"reciprocity":"unknown","note":"dynamics inferred from behavior only, not mind-reading"}
-        interps=[]
-        def interp(h,c,ev): interps.append({"hypothesis":h,"confidence":c,"evidence":ev})
-        if "cold" in flags: interp("可能忙或精力低，回复意愿暂时下降",0.45,facts); interp("可能对当前话题兴趣不高",0.35,facts)
-        elif "silence" in flags: interp("可能在忙或需要空间，尚无足够证据判断关系降温",0.5,facts); interp("可能投入下降，需结合基线和后续主动性验证",0.32,facts)
-        elif "passive_aggressive" in flags: interp("可能有不满或失望，但也可能只是随口语气",0.58,facts); interp("可能在试探用户是否在意",0.30,facts)
-        elif "flirt_signal" in flags: interp("可能存在好感或愿意升温，仍需看持续主动和线下兑现",0.55,facts)
-        elif "conflict" in flags: interp("可能感到不被理解或边界被碰到",0.6,facts)
-        elif "breakup" in flags: interp("对方正在表达结束关系的决定或强烈冲动，需用户确认真实意图",0.65,facts)
-        else: interp("对方在正常分享或延续话题",0.55,facts)
-        ctx["possible_interpretations"]=interps
-        # Stage estimate with alternatives, never forced
-        rel=(mem.get("relationship") or {})
-        stage=raw.get("relationship_stage") or rel.get("stage") or "认识"
-        if "breakup" in flags: stage="分手"
-        elif "conflict" in flags and stage in ("恋爱","稳定恋爱","婚姻"): stage="冲突"
-        elif "cold" in flags and stage in ("暧昧","追求","恋爱"): stage="冷淡"
-        sconf=float(raw.get("stage_confidence") or rel.get("stage_confidence") or 0.55)
-        ctx["relationship_stage"]=stage; ctx["stage_confidence"]=sconf
-        alt=[s for s in STAGES if s!=stage][:2]
-        ctx["alternative_stages"]=[{"stage":alt[0],"confidence":round(max(0.05,1-sconf-0.15),2)}] if alt else []
-        if len(alt)>1: ctx["alternative_stages"].append({"stage":alt[1],"confidence":0.08})
-        # Strategize + plan
-        plan=plan_reply(ctx); ctx.update(plan)
-        # Knowledge on demand (Tier routing)
-        ctx["knowledge_used"]=self.kb.search(text+" "+stage+" "+ctx["reply_intent"], limit=3)
-        # Generate -> simulate -> critic -> revise
-        cands=generate_candidates(ctx)
-        sims=[]; crits=[]; finals=[]
-        for cand in cands:
-            sim=simulate(cand,ctx); sims.append(sim)
-            crit=critique(cand,ctx,sim); crits.append(crit)
-            finals.append(revise(cand,crit,ctx) if not crit["passed"] else cand)
+        # ---- Fast heuristic is only a pre-classifier / safety signal ----
+        ctx["pre_flags"]=flags
+        # ---- Knowledge retrieval (Tier-labelled) BEFORE LLM reasoning ----
+        kb_hits=self.kb.search(text+" "+ctx["recent_context"]+" "+" ".join(flags), limit=3)
+        ctx["knowledge_used"]=kb_hits
+        kb_block=self.kb.prompt_block(kb_hits)
+        # ---- LLM chain: interpret -> stage -> strategize -> generate -> simulate -> critic/revise ----
+        llm_cfg=raw.get("llm_config") or {k:self.config[k] for k in ("provider","base_url","model","api_key_env","temperature") if k in self.config}
+        provider=raw.get("llm_provider_instance") or load_provider(self.root, llm_cfg)
+        ctx["llm_provider"]=getattr(provider,"name","unknown")
+        ctx["llm_provider_used"]=ctx["llm_provider"]
+        if getattr(provider,"fallback_reason",""): ctx["llm_fallback_reason"]=provider.fallback_reason
+        ctx["real_llm_available"]=ctx["llm_provider"]=="openai_compatible"
+        prompts_dir=self.root/"llm/prompts"
+        def sysprompt(name):
+            fp=prompts_dir/f"{name}.md"
+            return fp.read_text(encoding="utf-8") if fp.exists() else f"You are the love-agent {name}. Output strict JSON only."
+        def payload(extra=None):
+            base={"context":{"current_message":text,"recent_context":ctx["recent_context"],"person":ctx["person"],
+                             "person_memory":mem,"provided_stage":raw.get("relationship_stage",""),"pre_flags":flags,
+                             "observed_facts":facts,"multimodal":mm,"multimodal_kind":mm.get("kind","text"),
+                             "relationship_stage":ctx.get("relationship_stage",""),"possible_interpretations":ctx.get("possible_interpretations",[]),
+                             "reply_intent":ctx.get("reply_intent",""),"user_goal":ctx["user_goal"]},
+                  "knowledge_tiered":kb_hits,"knowledge_prompt_block":kb_block,
+                  "tier_rule":"Tier C is practical examples only, never scientific fact. Tier D is this person's memory and outranks generic advice."}
+            if extra: base["context"].update(extra)
+            return base
+        llm_calls=[]
+        try:
+            interp_out=provider.complete_json("interpret", sysprompt("interpret"), payload()); llm_calls.append("interpret")
+            if interp_out.get("possible_interpretations"): ctx["possible_interpretations"]=interp_out["possible_interpretations"]
+            else: ctx["possible_interpretations"]=[{"hypothesis":"对方在正常分享或延续话题","confidence":0.4,"evidence":facts}]
+            if interp_out.get("observed_facts"): ctx["observed_facts"]=list(dict.fromkeys(facts+interp_out["observed_facts"]))
+            if interp_out.get("emotional_state"): ctx["emotional_state"]=interp_out["emotional_state"]
+            ctx["relationship_signals"]=interp_out.get("relationship_signals",[])
+            ctx["uncertainties"]=interp_out.get("uncertainties",[])
+            stage_out=provider.complete_json("stage", sysprompt("stage"), payload()); llm_calls.append("stage")
+            stage=stage_out.get("stage") or raw.get("relationship_stage") or "认识"
+            sconf=float(stage_out.get("confidence") or 0.55)
+            ctx["relationship_stage"]=stage; ctx["stage_confidence"]=sconf
+            ctx["alternative_stages"]=stage_out.get("alternatives",[])
+            strat=provider.complete_json("strategize", sysprompt("strategize"), payload()); llm_calls.append("strategize")
+            ctx["recommended_strategy"]=strat.get("strategy","")
+            ctx["reply_intent"]=strat.get("reply_intent","continue")
+            ctx["tone"]=strat.get("tone","自然")
+            ctx["things_to_avoid"]=strat.get("things_to_avoid",[])
+            ctx["wait_or_reply"]=strat.get("wait_or_reply","reply")
+            ctx["strategy_reasoning"]=strat.get("reasoning_summary","")
+            gen=provider.complete_json("generate", sysprompt("generate"), payload()); llm_calls.append("generate")
+            cands=gen.get("candidates",[])
+            if not cands: raise LLMUnavailable("LLM returned no candidates")
+            sims=[]; crits=[]; finals=[]; iterations=0
+            for cand in cands:
+                cur=dict(cand); sim=None; crit=None
+                for attempt in range(4):  # initial + max 3 revisions
+                    sim_raw=provider.complete_json("simulate", sysprompt("simulate"), payload({"candidate":cur})); llm_calls.append("simulate")
+                    sim={"reply":cur.get("text",""),"interpretation":sim_raw.get("interpretation",""),
+                         "predicted_reaction":sim_raw.get("likely_reactions",[]),"possible_reply":sim_raw.get("possible_reply",""),
+                         "pressure":sim_raw.get("pressure",0.3),"interest":sim_raw.get("interest",0.5),
+                         "risk":sim_raw.get("risk",0.3),"uncertainty":sim_raw.get("uncertainty","概率模拟，非真实预测")}
+                    rule_crit=critique(cur,ctx,sim)
+                    llm_crit=provider.complete_json("critic", sysprompt("critic"), payload({"candidate":cur,"simulation":sim})); llm_calls.append("critic")
+                    crit={"reply":cur.get("text",""),"rule_critic":rule_crit,"llm_critic":llm_crit,
+                          "passed":bool(rule_crit.get("passed")) and bool(llm_crit.get("llm_pass",True)),
+                          "checks":rule_crit.get("checks",[]),"failed_checks":rule_crit.get("failed_checks",[])+llm_crit.get("issues",[])}
+                    if crit["passed"] or attempt==3: break
+                    iterations+=1
+                    rev=provider.complete_json("revise", sysprompt("revise"), payload({"candidate":cur,"critic":crit})); llm_calls.append("revise")
+                    if rev.get("text"): cur={**cur,"text":rev["text"],"revised":True}
+                    else: break
+                sims.append(sim); crits.append(crit); finals.append(cur)
+            ctx["critic_iterations"]=iterations
+        except Exception as e:
+            # Fallback: old rule chain, explicitly labelled - never pretend this was LLM reasoning.
+            ctx["llm_provider_used"]="rules_fallback"; ctx["llm_error"]=str(e)
+            ctx["possible_interpretations"]=[{"hypothesis":"规则回退：对方在延续话题或给出低信息回复","confidence":0.35,"evidence":facts}]
+            rel=(mem.get("relationship") or {}); stage=raw.get("relationship_stage") or rel.get("stage") or "认识"
+            if "breakup" in flags: stage="分手"
+            elif "conflict" in flags and stage in ("恋爱","稳定恋爱","婚姻"): stage="冲突"
+            elif "cold" in flags and stage in ("暧昧","追求","恋爱"): stage="冷淡"
+            ctx["relationship_stage"]=stage; sconf=float(rel.get("stage_confidence") or 0.45); ctx["stage_confidence"]=sconf
+            plan=plan_reply(ctx); ctx.update(plan)
+            finals=generate_candidates(ctx); sims=[]; crits=[]
+            for cand in finals:
+                sim=simulate(cand,ctx); crit=critique(cand,ctx,sim); sims.append(sim); crits.append(crit)
+            ctx["critic_iterations"]=0
+        ctx["llm_calls"]=llm_calls if 'llm_calls' in locals() else []
+        ctx["llm_prompt_audit"]=getattr(provider,"calls",[])
         ctx["candidate_replies"]=finals; ctx["simulated_reactions"]=sims; ctx["critic_results"]=crits
         # Decide
         best_idx=min(range(len(finals)), key=lambda i: sims[i].get("risk",1)) if finals else 0
@@ -150,6 +215,10 @@ class LoveAgentEngine:
         # Memory update only on facts, not guesses
         if raw.get("record_memory", True):
             ctx["memory_updates"]=[self.memory.record_turn(person_id,msg,ctx["final_reply"] if ctx["should_send"] else "",facts)]
+            outcome=raw.get("outcome_of_previous_reply")
+            if outcome and raw.get("previous_reply_text"):
+                recorded=self.memory.record_outcome(person_id, raw["previous_reply_text"], outcome)
+                if recorded: ctx["memory_updates"].append(recorded)
         return ctx
 
 def process_message(raw: dict, project_root: str|Path|None=None) -> dict:

@@ -1,0 +1,8 @@
+{
+  "provider": "mock",
+  "base_url": "",
+  "api_key_env": "LOVE_AGENT_API_KEY",
+  "model": "",
+  "temperature": 0.3,
+  "note": "Set provider to openai_compatible and env LOVE_AGENT_API_KEY/LOVE_AGENT_BASE_URL/LOVE_AGENT_MODEL to use a real model. No key is stored in repo."
+}

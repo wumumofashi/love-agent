@@ -5,7 +5,7 @@ from datetime import datetime
 
 class PersonMemoryStore:
     """Per-person long-term memory. Tier D data, highest priority, never overwrite facts with guesses."""
-    FILES=["profile.json","preferences.json","relationship.json","important_events.json","conversation_summary.json"]
+    FILES=["profile.json","preferences.json","relationship.json","important_events.json","conversation_summary.json","interaction_patterns.json","relationship_events.json"]
     def __init__(self, root: str|Path):
         self.root=Path(root)
     def person_dir(self, person_id: str) -> Path:
@@ -18,6 +18,8 @@ class PersonMemoryStore:
             "relationship.json":{"stage":"认识","stage_confidence":0.3,"dynamics":{},"commitments":[],"boundaries":[]},
             "important_events.json":{"events":[]},
             "conversation_summary.json":{"summary":"","recent_topics":[],"last_updated":""},
+            "interaction_patterns.json":{"patterns":[],"reply_rhythm":"","initiation_balance":"unknown"},
+            "relationship_events.json":{"events":[],"commitments":[],"boundaries":[]},
         }
         if seed:
             defaults["profile.json"].update(seed.get("profile",{}))
@@ -33,6 +35,18 @@ class PersonMemoryStore:
             try: out[name[:-5]]=json.loads((self.person_dir(person_id)/name).read_text(encoding="utf-8"))
             except Exception: out[name[:-5]]={}
         return out
+    def record_outcome(self, person_id: str, reply_text: str, outcome: str):
+        """Only user/observed outcomes may mark a reply effective/negative. Guesses never write here."""
+        if outcome not in ("effective","negative") or not reply_text: return None
+        self.ensure(person_id); d=self.person_dir(person_id)
+        p=d/"preferences.json"; data=json.loads(p.read_text(encoding="utf-8"))
+        key="effective_replies" if outcome=="effective" else "negative_replies"
+        data.setdefault(key,[]).append({"text":reply_text,"outcome":outcome,"time":datetime.now().isoformat(timespec="seconds")})
+        data[key]=data[key][-50:]
+        # known_preferences mirrors explicitly known likes, kept separate from guesses
+        data["known_preferences"]=list(dict.fromkeys(data.get("known_preferences",[])+data.get("likes",[])))
+        p.write_text(json.dumps(data,ensure_ascii=False,indent=2),encoding="utf-8")
+        return {"person_id":person_id,"outcome_recorded":outcome}
     def record_turn(self, person_id: str, incoming: str, final_reply: str, observed_facts: list[str]):
         self.ensure(person_id)
         d=self.person_dir(person_id)

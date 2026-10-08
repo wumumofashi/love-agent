@@ -10,7 +10,7 @@ version: "0.1.0"
 
 这是一个闭环系统：Observe → Remember → Interpret → Estimate → Strategize → Generate → Simulate → Critique → Revise → Decide whether to send → Send → Observe reaction → Update memory。
 
-心理学层只负责理解，不直接写最终聊天文本。最终文本必须经过：战略决策 → 回复规划 → 中文话术生成 → 对方模拟 → Critic → 修正。
+心理学层只负责理解，不直接写最终聊天文本。核心判断由统一 LLM Provider 完成（llm/：interpret→stage→strategize→generate→simulate→critic→revise，OpenAI-compatible，Mock 供 CI）；关键词规则只是 fast pre-classifier、安全门与 LLM 不可用时的 fallback，不得冒充最终智能。KnowledgeBase 的 Tier 条目与人物 Memory 必须实际进入 LLM prompt（可由 llm_prompt_audit 核查）。
 
 ## 三种模式（默认建议模式）
 
