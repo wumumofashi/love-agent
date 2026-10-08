@@ -2,7 +2,8 @@
   "provider": "openai_compatible",
   "base_url": "https://apihub.agnes-ai.com/v1",
   "api_key_env": "LOVE_AGENT_API_KEY",
-  "model": "agnes-3.0-flash",
+  "model": "agnes-2.5-flash",
   "temperature": 0.3,
-  "note": "Key is read from env LOVE_AGENT_API_KEY only, never stored in repo. agnes-2.5-pro returned insufficient quota on 2026-10-09; flash models work."
+  "note": "Model locked to agnes-2.5-flash per user request. All LLM calls are serial (one in flight, sequential chain). Key read from env LOVE_AGENT_API_KEY only, never stored.",
+  "concurrency": "serial_only"
 }

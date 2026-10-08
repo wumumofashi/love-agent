@@ -1,5 +1,6 @@
 from __future__ import annotations
-import json, os, time, urllib.request, urllib.error
+import json, os, threading, time, urllib.request, urllib.error
+_SERIAL_LOCK=threading.Lock()  # serial-only: never more than one LLM request in flight
 from .provider import LLMProvider, LLMUnavailable
 
 class OpenAICompatibleProvider(LLMProvider):
@@ -20,6 +21,14 @@ class OpenAICompatibleProvider(LLMProvider):
         req=urllib.request.Request(self.base_url+"/chat/completions", data=json.dumps(body).encode("utf-8"),
             headers={"Content-Type":"application/json","Authorization":"Bearer "+os.environ[self.api_key_env]})
         data=None; last_err=None
+        _SERIAL_LOCK.acquire()
+        try:
+            data,last_err=self._request_with_retry(req)
+        finally:
+            _SERIAL_LOCK.release()
+        return data,last_err
+    def _request_with_retry(self, req):
+        data=None; last_err=None
         for attempt, delay in enumerate([0, 2, 5]):
             if delay: time.sleep(delay)
             try:
@@ -31,6 +40,7 @@ class OpenAICompatibleProvider(LLMProvider):
             except Exception as e:
                 last_err=e
         if data is None: raise LLMUnavailable(f"LLM request failed after retries: {last_err}")
+        return data,last_err
         self.calls.append({"task":task,"system":system[:200]})
         try: content=data["choices"][0]["message"]["content"]
         except Exception as e: raise LLMUnavailable(f"unexpected LLM response shape: {e}") from e
