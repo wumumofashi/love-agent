@@ -37,3 +37,4 @@
 - **littlecodersh/ItChat**：网页微信协议库，26k stars/MIT，但主分支代码停在 2018 年；且腾讯早已限制网页微信登录，绝大多数账号扫码会报「已不允许登录网页微信」，客户侧不可靠。不可用。
 - 结论不变：能合法销售的只剩 UI 自动化路线。wxauto（Apache-2.0）源码收编自维护是当前定版方案；LearnLove（DB 路线，仍维护）为重型备选。
 - **AvengersWeChat/PadChat-SDK**：iPad 协议 SDK，只是客户端封装，必须连它配套的 Windows 协议服务器；该服务早已停运，仓库代码实质停在 2018 年且无许可证。协议登录本身也是封号重灾区。不可用。
+- **Luofeng-Cloud/WeChat-AI-AutoReply**：视觉感知（PrintWindow 截图 + RapidOCR）+ Win32 PostMessage 发送，MIT 许可证，本人微信 3.x/4.x 可用，白名单/群聊拦截/分好友人设齐全；2026-09 新建仓、仍在更新。缺点：24 星、单作者、一个月历史，OCR 感知比 UI 树脆弱，自带大脑只是 system prompt。可用作传输层候选：保留其视觉收发，改接 love-agent 引擎做决策。
