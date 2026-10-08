@@ -1,8 +1,8 @@
 {
-  "provider": "mock",
-  "base_url": "",
+  "provider": "openai_compatible",
+  "base_url": "https://apihub.agnes-ai.com/v1",
   "api_key_env": "LOVE_AGENT_API_KEY",
-  "model": "",
+  "model": "agnes-3.0-flash",
   "temperature": 0.3,
-  "note": "Set provider to openai_compatible and env LOVE_AGENT_API_KEY/LOVE_AGENT_BASE_URL/LOVE_AGENT_MODEL to use a real model. No key is stored in repo."
+  "note": "Key is read from env LOVE_AGENT_API_KEY only, never stored in repo. agnes-2.5-pro returned insufficient quota on 2026-10-09; flash models work."
 }

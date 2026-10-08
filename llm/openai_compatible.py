@@ -1,5 +1,5 @@
 from __future__ import annotations
-import json, os, urllib.request, urllib.error
+import json, os, time, urllib.request, urllib.error
 from .provider import LLMProvider, LLMUnavailable
 
 class OpenAICompatibleProvider(LLMProvider):
@@ -19,10 +19,18 @@ class OpenAICompatibleProvider(LLMProvider):
               "response_format":{"type":"json_object"}}
         req=urllib.request.Request(self.base_url+"/chat/completions", data=json.dumps(body).encode("utf-8"),
             headers={"Content-Type":"application/json","Authorization":"Bearer "+os.environ[self.api_key_env]})
-        try:
-            with urllib.request.urlopen(req, timeout=self.timeout) as r: data=json.loads(r.read().decode("utf-8"))
-        except Exception as e:
-            raise LLMUnavailable(f"LLM request failed: {e}") from e
+        data=None; last_err=None
+        for attempt, delay in enumerate([0, 2, 5]):
+            if delay: time.sleep(delay)
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as r: data=json.loads(r.read().decode("utf-8"))
+                break
+            except urllib.error.HTTPError as e:
+                last_err=e
+                if e.code not in (429, 500, 502, 503, 504): raise LLMUnavailable(f"LLM request failed: {e}") from e
+            except Exception as e:
+                last_err=e
+        if data is None: raise LLMUnavailable(f"LLM request failed after retries: {last_err}")
         self.calls.append({"task":task,"system":system[:200]})
         try: content=data["choices"][0]["message"]["content"]
         except Exception as e: raise LLMUnavailable(f"unexpected LLM response shape: {e}") from e

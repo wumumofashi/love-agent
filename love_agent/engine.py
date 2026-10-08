@@ -14,6 +14,20 @@ from multimodal.vision import describe_image
 from multimodal.audio import transcribe_voice, video_frames
 from llm.provider import load_provider, LLMUnavailable
 
+def _norm_interpretations(items, facts):
+    out=[]
+    for it in items or []:
+        if isinstance(it, dict): out.append({"hypothesis":it.get("hypothesis",""),"confidence":float(it.get("confidence",0.4) or 0.4),"evidence":it.get("evidence",facts)})
+        elif isinstance(it, str): out.append({"hypothesis":it,"confidence":0.4,"evidence":facts})
+    return out
+
+def _norm_candidates(items):
+    out=[]
+    for it in items or []:
+        if isinstance(it, dict) and it.get("text"): out.append({"label":it.get("label","自然型"),"text":str(it["text"]),"intent":it.get("intent","")})
+        elif isinstance(it, str) and it.strip(): out.append({"label":"自然型","text":it,"intent":""})
+    return out
+
 DEFAULT_CONFIG={"autopilot_min_confidence":0.85,"confirm_min_confidence":0.60,"max_auto_risk":0.35,"sensitive_topics":FORBIDDEN_AUTO_TOPICS}
 
 COLD={"嗯","哦","好","好的","行","哈哈","嗯嗯","哦哦","知道了"}
@@ -127,7 +141,7 @@ class LoveAgentEngine:
         llm_calls=[]
         try:
             interp_out=provider.complete_json("interpret", sysprompt("interpret"), payload()); llm_calls.append("interpret")
-            if interp_out.get("possible_interpretations"): ctx["possible_interpretations"]=interp_out["possible_interpretations"]
+            if interp_out.get("possible_interpretations"): ctx["possible_interpretations"]=_norm_interpretations(interp_out["possible_interpretations"], facts)
             else: ctx["possible_interpretations"]=[{"hypothesis":"对方在正常分享或延续话题","confidence":0.4,"evidence":facts}]
             if interp_out.get("observed_facts"): ctx["observed_facts"]=list(dict.fromkeys(facts+interp_out["observed_facts"]))
             if interp_out.get("emotional_state"): ctx["emotional_state"]=interp_out["emotional_state"]
@@ -139,14 +153,16 @@ class LoveAgentEngine:
             ctx["relationship_stage"]=stage; ctx["stage_confidence"]=sconf
             ctx["alternative_stages"]=stage_out.get("alternatives",[])
             strat=provider.complete_json("strategize", sysprompt("strategize"), payload()); llm_calls.append("strategize")
-            ctx["recommended_strategy"]=strat.get("strategy","")
+            _strat=strat.get("strategy","")
+            if isinstance(_strat, dict): _strat=_strat.get("tactical_approach") or _strat.get("core_objective") or _strat.get("situation_analysis") or ""
+            ctx["recommended_strategy"]=str(_strat)
             ctx["reply_intent"]=strat.get("reply_intent","continue")
             ctx["tone"]=strat.get("tone","自然")
             ctx["things_to_avoid"]=strat.get("things_to_avoid",[])
             ctx["wait_or_reply"]=strat.get("wait_or_reply","reply")
             ctx["strategy_reasoning"]=strat.get("reasoning_summary","")
             gen=provider.complete_json("generate", sysprompt("generate"), payload()); llm_calls.append("generate")
-            cands=gen.get("candidates",[])
+            cands=_norm_candidates(gen.get("candidates",[]))
             if not cands: raise LLMUnavailable("LLM returned no candidates")
             sims=[]; crits=[]; finals=[]; iterations=0
             for cand in cands:
