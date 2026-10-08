@@ -1,3 +1,5 @@
+> **定位更正（2026-10-09）**：CowAgent 的 weixin 渠道走 ilink bot 协议，登录的是一个机器人身份，消息是别人（主要是客户本人）和这个机器人之间的对话——性质是「AI 助理工作台」，和豆包+飞书/微信同类。它**不能**读取或回复客户个人微信里与某位联系人的对话，因此不适合本技能的主产品形态（在客户本人微信里回复对方）。本集成保留，适用于把 love-agent 做成「咨询机器人」的场景；主产品请走 wxauto 路线（adapters/wechat/runner.py，可 vendor 源码自维护）。
+
 # love-agent × CowAgent 集成（主力微信路线）
 
 选用原因（2026-10-09 核实）：CowAgent（zhayujie/CowAgent，约 4.7 万 stars，MIT）是同类里真正在持续维护的项目——2026-10-08 当天仍有 weixin 渠道的代码提交。wxauto 已于 2026 年 2 月停止维护（仓库内保留为冻结备选），WeChatFerry 已归档。
