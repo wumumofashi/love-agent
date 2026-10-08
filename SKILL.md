@@ -14,7 +14,35 @@ version: "0.1.0"
 
 ## 如何直接使用（给宿主 Agent 的执行说明）
 
-当用户给出对方的一句话并问「怎么回 / 她什么意思」时，宿主 Agent 应直接调用本技能的 CLI，不要自己临场编话术：
+### 方式 A：宿主大脑模式（无需 Key，优先用于豆包等通用 Agent）
+
+宿主模型（你）本身就是本技能的大脑，不需要任何 API Key，也不需要运行代码。用户给出对方的一句话后，你必须**在内部按顺序串行执行**以下 10 步，每一步的指令以 `llm/prompts/` 对应文件为准（interpret.md → stage.md → strategize.md → generate.md → simulate.md → critic.md → revise.md），并遵守本文件后面的流水线与证据纪律：
+
+1. Observe：只记录事实（对方原话、时间、上下文），不解读。
+2. Remember：若对话中已有该人物信息（性格、偏好、边界、历史），先调用；没有就向用户确认或明确标注「暂无人物档案」，禁止编造。
+3. Interpret（按 llm/prompts/interpret.md）：输出 observed_facts 与 possible_interpretations，每条假设必须带 confidence（0–1）和 evidence；禁止「她这样就是吃醋」式断言。
+4. Stage（stage.md）：给 stage + confidence + 备选阶段，不强行分类。
+5. Strategize（strategize.md）：先战略后话术，给 reply_intent、tone、things_to_avoid。
+6. Generate（generate.md）：生成最多 3 条自然中文候选，短、像真人、无 AI 腔。
+7. Simulate（simulate.md）：逐条模拟对方可能的理解、压力与回复，给 risk；这是概率模拟，必须结合人物设定，不是预言。
+8. Critic（critic.md）：逐条过 12 项检查；不通过就 Revise（revise.md）修正，最多 3 轮；允许得出「建议不要回复」。
+9. Decide：按用户选定的模式（suggest/confirm/autopilot）与敏感话题拦截规则给 send_decision；敏感话题（分手、复合、金钱、性、婚姻、重大承诺、冲突、威胁、法律）永远不自动发。
+10. 输出给用户时用这个固定格式（不要省略解读直接给话术）：
+
+```
+【解读】事实：…；可能解释：…（置信 0.xx，依据：…）
+【阶段】…（置信 0.xx；备选：…）
+【战略】…
+【建议回复】…（主推一条；有备选时列 A/B/C 并标注各自风险）
+【对方可能反应】…
+【决策】建议发送 / 等你确认 / 建议不回复 —— 理由一句话
+```
+
+纪律：步骤必须串行，后一步只能基于前一步的结果；不得跳步、不得并行编造多个版本糊弄；知识只按「路由」一节读对应文件，不要把 Tier C 经验说成是科学结论。用户只问「她什么意思」时可以只给到解读+阶段，但仍须内部走完证据纪律。
+
+### 方式 B：CLI 模式（宿主能跑代码、且用户自备 Key 时）
+
+当用户给出对方的一句话并问「怎么回 / 她什么意思」时，也可以直接调用本技能的 CLI，不要自己临场编话术：
 
 ```bash
 cd <skill_dir>
@@ -26,7 +54,7 @@ python3 bin/love_agent.py --content "对方原话" --stage 暧昧 --mode confirm
 - CLI 输出 JSON：核心字段 `possible_interpretations`（带 confidence）、`relationship_stage`、`recommended_strategy`、`final_reply`、`confidence`、`send_decision`、`decision_reason`。把 `final_reply` 作为建议回复呈现给用户，并附一句解读依据；不要把推测说成事实。
 - 人物长期记忆在 `memory/people/<person_id>/`，用 `--person-id` 指定；没有档案时先按模板新建，不要编造对方历史。
 
-## 大脑配置（真实 LLM）
+## 大脑配置（仅 CLI 模式需要，宿主大脑模式忽略本节）
 
 `config/model.json` 已锁定：provider=openai_compatible，base_url=https://apihub.agnes-ai.com/v1，model=**agnes-2.5-flash**。宿主只需在环境变量中提供 key（永远不要写进任何文件）：
 
