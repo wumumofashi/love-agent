@@ -23,7 +23,7 @@ version: "0.1.0"
 3. Interpret（按 llm/prompts/interpret.md）：输出 observed_facts 与 possible_interpretations，每条假设必须带 confidence（0–1）和 evidence；禁止「她这样就是吃醋」式断言。
 4. Stage（stage.md）：给 stage + confidence + 备选阶段，不强行分类。
 5. Strategize（strategize.md）：先战略后话术，给 reply_intent、tone、things_to_avoid。
-6. Generate（generate.md）：生成最多 3 条自然中文候选，短、像真人、无 AI 腔。
+6. Generate（generate.md）：**先查常用语句库** `knowledge/scripts/phrase-bank.json`：用 reply_intent + 当前阶段 + 对方原话触发词匹配，分数 = base + 阶段匹配 + 触发匹配（整句命中最高）。命中且分数 ≥ 0.78 时，直接拿库里语句当候选，**不再现场生成**（省一次生成、结果更稳）；没命中才按 generate.md 现场生成最多 3 条自然中文候选。哪种来源都要在内部标清（phrase_bank / 现场生成），且库里语句也必须继续走第 7、8 步模拟与 Critic，不许因为「是现成的」就跳过检查。
 7. Simulate（simulate.md）：逐条模拟对方可能的理解、压力与回复，给 risk；这是概率模拟，必须结合人物设定，不是预言。
 8. Critic（critic.md）：逐条过 12 项检查；不通过就 Revise（revise.md）修正，最多 3 轮；允许得出「建议不要回复」。
 9. Decide：按用户选定的模式（suggest/confirm/autopilot）与敏感话题拦截规则给 send_decision；敏感话题（分手、复合、金钱、性、婚姻、重大承诺、冲突、威胁、法律）永远不自动发。

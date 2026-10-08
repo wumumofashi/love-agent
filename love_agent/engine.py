@@ -4,6 +4,7 @@ from pathlib import Path
 from .schema import empty_context, STAGES, FORBIDDEN_AUTO_TOPICS
 from .memory import PersonMemoryStore
 from .knowledge import KnowledgeBase
+from .phrase_bank import PhraseBank
 import sys
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 from reply.planner import plan_reply
@@ -28,7 +29,7 @@ def _norm_candidates(items):
         elif isinstance(it, str) and it.strip(): out.append({"label":"自然型","text":it,"intent":""})
     return out
 
-DEFAULT_CONFIG={"autopilot_min_confidence":0.85,"confirm_min_confidence":0.60,"max_auto_risk":0.35,"sensitive_topics":FORBIDDEN_AUTO_TOPICS}
+DEFAULT_CONFIG={"autopilot_min_confidence":0.85,"confirm_min_confidence":0.60,"max_auto_risk":0.35,"sensitive_topics":FORBIDDEN_AUTO_TOPICS,"phrase_bank_enabled":True,"phrase_bank_min_score":0.78}
 
 COLD={"嗯","哦","好","好的","行","哈哈","嗯嗯","哦哦","知道了"}
 PASSIVE=["你忙你的吧","随便你","无所谓","呵呵","你开心就好","行吧，你说的都对"]
@@ -50,6 +51,7 @@ class LoveAgentEngine:
         self.config={**DEFAULT_CONFIG, **cfg, **(config or {})}
         self.memory=PersonMemoryStore(self.root/"memory")
         self.kb=KnowledgeBase(self.root)
+        self.phrase_bank=PhraseBank(self.root/"knowledge/scripts/phrase-bank.json")
 
     # Observe
     def observe(self, raw: dict) -> dict:
@@ -161,9 +163,20 @@ class LoveAgentEngine:
             ctx["things_to_avoid"]=strat.get("things_to_avoid",[])
             ctx["wait_or_reply"]=strat.get("wait_or_reply","reply")
             ctx["strategy_reasoning"]=strat.get("reasoning_summary","")
-            gen=provider.complete_json("generate", sysprompt("generate"), payload()); llm_calls.append("generate")
-            cands=_norm_candidates(gen.get("candidates",[]))
-            if not cands: raise LLMUnavailable("LLM returned no candidates")
+            # Phrase bank first (user rule): a confident hit on a common phrase
+            # skips the LLM generation call entirely; bank candidates still go
+            # through simulate+critic below. Only a miss calls the LLM generate.
+            bank_hits=[]
+            if self.config.get("phrase_bank_enabled", True):
+                bank_hits=[h for h in self.phrase_bank.match(ctx.get("reply_intent",""), stage, text)
+                           if h["bank_score"] >= float(self.config.get("phrase_bank_min_score", 0.78))]
+            if bank_hits:
+                cands=bank_hits; ctx["generate_source"]="phrase_bank"
+                ctx["phrase_bank_hits"]=bank_hits; llm_calls.append("generate")
+            else:
+                gen=provider.complete_json("generate", sysprompt("generate"), payload()); llm_calls.append("generate")
+                cands=_norm_candidates(gen.get("candidates",[])); ctx["generate_source"]="llm"
+                if not cands: raise LLMUnavailable("LLM returned no candidates")
             sims=[]; crits=[]; finals=[]; iterations=0
             for cand in cands:
                 cur=dict(cand); sim=None; crit=None

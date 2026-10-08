@@ -27,5 +27,7 @@
     "voice_provider": "learnlove-sensevoice-or-whisper",
     "vision_provider": "learnlove-qwen2.5-vl-or-remote",
     "ocr_provider": "lovehelper-wechat-ocr"
-  }
+  },
+  "phrase_bank_enabled": true,
+  "phrase_bank_min_score": 0.78
 }
