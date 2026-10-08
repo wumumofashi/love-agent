@@ -9,7 +9,7 @@
 [![Tests](https://img.shields.io/badge/Tests-24%2F24_passing-brightgreen.svg)](tests/)
 [![GitHub](https://img.shields.io/github/stars/wumumofashi/love-agent?style=social)](https://github.com/wumumofashi/love-agent)
 
-[English](#english) · [中文](#chinese) · [日本語](#japanese) · [한국어](#korean) · [Español](#spanish) · [Français](#french) · [Deutsch](#german) · [Tiếng Việt](#vietnamese) · [Indonesia](#indonesian) · [ภาษาไทย](#thai)
+[English](#english) · [中文](#中文) · [日本語](#日本語) · [한국어](#한국어) · [Español](#español) · [Français](#français) · [Deutsch](#deutsch) · [Tiếng Việt](#tiếng-việt) · [Indonesia](#indonesian) · [ภาษาไทย](#thai)
 
 </div>
 
