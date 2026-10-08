@@ -1,0 +1,31 @@
+{
+  "autopilot_min_confidence": 0.85,
+  "confirm_min_confidence": 0.6,
+  "max_auto_risk": 0.35,
+  "mode": "suggest",
+  "sensitive_topics": [
+    "分手",
+    "复合",
+    "借钱",
+    "转账",
+    "金钱",
+    "结婚",
+    "重大承诺",
+    "性决定",
+    "威胁",
+    "法律",
+    "自杀",
+    "自伤",
+    "家暴"
+  ],
+  "wechat": {
+    "adapter": "mock",
+    "valve_level": 1,
+    "monitor_interval_sec": 2
+  },
+  "multimodal": {
+    "voice_provider": "learnlove-sensevoice-or-whisper",
+    "vision_provider": "learnlove-qwen2.5-vl-or-remote",
+    "ocr_provider": "lovehelper-wechat-ocr"
+  }
+}

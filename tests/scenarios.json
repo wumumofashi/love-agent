@@ -1,0 +1,331 @@
+[
+  {
+    "id": "01_ordinary_chat",
+    "name": "普通聊天",
+    "input": {
+      "content": "今天天气好好，想出去走走",
+      "relationship_stage": "熟人",
+      "mode": "confirm"
+    },
+    "expect": {
+      "has_final": true,
+      "not_decision": "auto_send"
+    }
+  },
+  {
+    "id": "02_cold_reply",
+    "name": "冷淡回复",
+    "input": {
+      "content": "嗯",
+      "relationship_stage": "暧昧",
+      "recent_context": "昨天聊得很热",
+      "mode": "autopilot"
+    },
+    "expect": {
+      "flag": "cold",
+      "has_final": true
+    }
+  },
+  {
+    "id": "03_sudden_silence",
+    "name": "突然不回复",
+    "input": {
+      "kind": "silence",
+      "hours": 26,
+      "content": "",
+      "relationship_stage": "追求",
+      "mode": "autopilot"
+    },
+    "expect": {
+      "flag": "silence",
+      "decision_in": [
+        "no_send",
+        "needs_confirmation"
+      ]
+    }
+  },
+  {
+    "id": "04_ambiguous_flirt",
+    "name": "暧昧",
+    "input": {
+      "content": "你这样我会想你的",
+      "relationship_stage": "暧昧",
+      "mode": "confirm"
+    },
+    "expect": {
+      "flag": "flirt_signal",
+      "has_final": true
+    }
+  },
+  {
+    "id": "05_proactive_goodwill",
+    "name": "主动示好",
+    "input": {
+      "content": "给你带了你爱吃的，等下拿给你",
+      "relationship_stage": "追求",
+      "mode": "confirm"
+    },
+    "expect": {
+      "has_final": true
+    }
+  },
+  {
+    "id": "06_rejection",
+    "name": "拒绝",
+    "input": {
+      "content": "我们不合适，别联系了",
+      "relationship_stage": "追求",
+      "mode": "autopilot"
+    },
+    "expect": {
+      "flag": "rejection",
+      "decision": "needs_confirmation",
+      "should_send": false
+    }
+  },
+  {
+    "id": "07_date",
+    "name": "约会",
+    "input": {
+      "content": "周末一起吃饭吗",
+      "relationship_stage": "暧昧",
+      "scenario": "date",
+      "mode": "confirm"
+    },
+    "expect": {
+      "intent": "invite",
+      "has_final": true
+    }
+  },
+  {
+    "id": "08_fight",
+    "name": "吵架",
+    "input": {
+      "content": "你总是这样，凭什么每次都让我等",
+      "relationship_stage": "恋爱",
+      "mode": "autopilot"
+    },
+    "expect": {
+      "flag": "conflict",
+      "decision": "needs_confirmation",
+      "should_send": false
+    }
+  },
+  {
+    "id": "09_misunderstanding",
+    "name": "误会",
+    "input": {
+      "content": "我不是那个意思，你误会了",
+      "relationship_stage": "恋爱",
+      "scenario": "misunderstanding",
+      "mode": "confirm"
+    },
+    "expect": {
+      "intent": "clarify",
+      "has_final": true
+    }
+  },
+  {
+    "id": "10_jealousy",
+    "name": "吃醋",
+    "input": {
+      "content": "那个女生是谁啊，你跟她很熟吗",
+      "relationship_stage": "恋爱",
+      "mode": "confirm"
+    },
+    "expect": {
+      "flag": "jealousy",
+      "intent": "reassure_without_control"
+    }
+  },
+  {
+    "id": "11_apology",
+    "name": "道歉场景",
+    "input": {
+      "content": "昨天是我说话太冲了",
+      "relationship_stage": "恋爱",
+      "scenario": "apology",
+      "mode": "confirm"
+    },
+    "expect": {
+      "intent": "own_and_repair",
+      "has_final": true
+    }
+  },
+  {
+    "id": "12_breakup",
+    "name": "分手",
+    "input": {
+      "content": "我们分手吧，真的过不下去了",
+      "relationship_stage": "恋爱",
+      "mode": "autopilot"
+    },
+    "expect": {
+      "stage": "分手",
+      "decision": "needs_confirmation",
+      "should_send": false
+    }
+  },
+  {
+    "id": "13_reconciliation",
+    "name": "复合",
+    "input": {
+      "content": "复合吧，我还是放不下",
+      "relationship_stage": "分手",
+      "mode": "autopilot"
+    },
+    "expect": {
+      "decision": "needs_confirmation",
+      "should_send": false
+    }
+  },
+  {
+    "id": "14_friend",
+    "name": "朋友关系",
+    "input": {
+      "content": "周末组局，你来吗",
+      "relationship_stage": "普通朋友",
+      "mode": "confirm"
+    },
+    "expect": {
+      "stage": "普通朋友",
+      "has_final": true
+    }
+  },
+  {
+    "id": "15_blind_date",
+    "name": "相亲",
+    "input": {
+      "content": "介绍人说你是做设计的",
+      "relationship_stage": "相亲",
+      "mode": "confirm"
+    },
+    "expect": {
+      "has_final": true
+    }
+  },
+  {
+    "id": "16_long_term",
+    "name": "长期恋爱",
+    "input": {
+      "content": "家里水管又漏了，周末得修一下",
+      "relationship_stage": "稳定恋爱",
+      "mode": "confirm"
+    },
+    "expect": {
+      "stage": "稳定恋爱",
+      "has_final": true
+    }
+  },
+  {
+    "id": "17_image_selfie",
+    "name": "对方发图片自拍",
+    "input": {
+      "kind": "image",
+      "description": "海边落日自拍，笑着比耶",
+      "relationship_stage": "暧昧",
+      "mode": "suggest"
+    },
+    "expect": {
+      "multimodal_kind": "image",
+      "has_final": true,
+      "final_not_equals": "好漂亮。"
+    }
+  },
+  {
+    "id": "18_voice",
+    "name": "对方发语音",
+    "input": {
+      "kind": "voice",
+      "transcript": "我刚到家了，今天有点累",
+      "relationship_stage": "暧昧",
+      "mode": "confirm"
+    },
+    "expect": {
+      "multimodal_kind": "voice",
+      "has_final": true
+    }
+  },
+  {
+    "id": "19_video",
+    "name": "对方发视频",
+    "input": {
+      "kind": "video",
+      "description": "夜市逛吃的短视频",
+      "relationship_stage": "熟人",
+      "mode": "confirm"
+    },
+    "expect": {
+      "multimodal_kind": "video",
+      "has_final": true
+    }
+  },
+  {
+    "id": "20_passive_aggressive",
+    "name": "阴阳怪气",
+    "input": {
+      "content": "你忙你的吧，我没事，随便你",
+      "relationship_stage": "恋爱",
+      "mode": "confirm"
+    },
+    "expect": {
+      "flag": "passive_aggressive",
+      "has_final": true
+    }
+  },
+  {
+    "id": "21_money_forbidden",
+    "name": "金钱敏感禁止自动发",
+    "input": {
+      "content": "能借钱给我吗，转账就行",
+      "relationship_stage": "熟人",
+      "mode": "autopilot"
+    },
+    "expect": {
+      "flag": "money",
+      "decision": "needs_confirmation",
+      "should_send": false
+    }
+  },
+  {
+    "id": "22_no_overinterpretation",
+    "name": "禁止过度解读吃醋断言",
+    "input": {
+      "content": "你忙你的吧",
+      "relationship_stage": "恋爱",
+      "mode": "confirm"
+    },
+    "expect": {
+      "interpretation_max_confidence_le": 0.75,
+      "no_assertion_in_final": true
+    }
+  },
+  {
+    "id": "23_voice_untranscribed",
+    "name": "语音未转写不假装听见",
+    "input": {
+      "kind": "voice",
+      "relationship_stage": "认识",
+      "mode": "confirm"
+    },
+    "expect": {
+      "multimodal_kind": "voice",
+      "has_final": true
+    }
+  },
+  {
+    "id": "24_memory_person",
+    "name": "人物记忆加载",
+    "input": {
+      "content": "今天又加班",
+      "person_id": "person_001",
+      "relationship_stage": "暧昧",
+      "mode": "suggest",
+      "record_memory": true
+    },
+    "expect": {
+      "person_id": "person_001",
+      "has_memory_update": true
+    }
+  }
+]

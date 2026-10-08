@@ -1,0 +1,6 @@
+[project]
+name="love-agent"
+version="0.1.0"
+description="Unified relationship decision, reply generation, simulation, critic, memory and WeChat execution skill"
+requires-python=">=3.10"
+dependencies=[]
