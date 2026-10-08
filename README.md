@@ -1,4 +1,4 @@
-# love-agent
+﻿# love-agent
 
 <div align="center">
 
@@ -481,3 +481,4 @@ PRs welcome! Please read [docs/RESEARCH_COMPARISON.md](docs/RESEARCH_COMPARISON.
 ## License
 
 MIT License.
+
