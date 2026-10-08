@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="zh"><head><meta charset="utf-8"><title>love-agent 真实对话测试窗</title>
+<style>body{font-family:system-ui;max-width:760px;margin:20px auto;padding:0 12px;color:#222}.row{display:flex;gap:8px;flex-wrap:wrap;margin:6px 0}.row>*{flex:1;min-width:140px}input,select,textarea{width:100%;box-sizing:border-box;padding:8px;border:1px solid #bbb;border-radius:8px}button{padding:9px 16px;border-radius:8px;border:0;background:#2563eb;color:#fff;cursor:pointer;font-weight:600;width:100%}button[disabled]{opacity:.5}.card{border:1px solid #ddd;border-radius:10px;padding:10px;margin:8px 0}.mut{color:#666;font-size:12px;line-height:1.5}.step{font-size:12px;color:#555;white-space:pre-wrap;max-height:200px;overflow:auto}.fin{font-size:17px;padding:10px;border-radius:10px;background:#f3f4f6}</style></head>
+<body><h3>love-agent 真实对话测试窗（agnes-2.5-flash，串行）</h3>
+<div class="mut">在本机浏览器打开即可直连 Agnes 接口测试。Key 只存在本页内存，不保存。</div>
+<div class="row"><div><div class="mut">API Key</div><input id="k" type="password" placeholder="sk-..."></div>
+<div><div class="mut">接口地址</div><input id="b" value="https://apihub.agnes-ai.com/v1"></div>
+<div><div class="mut">模型（锁定）</div><input value="agnes-2.5-flash" disabled></div></div>
+<div class="row"><div><div class="mut">阶段</div><select id="s"><option>认识</option><option>普通朋友</option><option selected>暧昧</option><option>恋爱</option><option>冲突</option></select></div>
+<div><div class="mut">模式</div><select id="m"><option value="suggest">建议</option><option value="confirm" selected>确认</option><option value="autopilot">自动驾驶</option></select></div></div>
+<div><div class="mut">人物设定</div><textarea id="p" rows="2">慢热，独立，需要空间；喜欢有一说一；不喜欢连环追问</textarea></div>
+<div><div class="mut">上下文</div><textarea id="c" rows="2">昨天聊得很热</textarea></div>
+<div class="row"><div style="flex:3"><div class="mut">对方的话</div><input id="msg" value="嗯"></div><div><button id="go">发送并分析</button></div></div>
+<div id="st" class="mut">等待测试。</div><div id="out"></div>
+<script>
+const $=i=>document.getElementById(i);let busy=false;const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function pj(s){try{return JSON.parse(s)}catch(e){const a=s.indexOf("{"),b=s.lastIndexOf("}");if(a>=0&&b>a)try{return JSON.parse(s.slice(a,b+1))}catch(_){}}return{raw:s}}
+async function call(task,sys,payload,label){const key=$("k").value.trim();if(!key)throw new Error("先填 API Key");const base=$("b").value.trim().replace(/\/$/,"");const body={model:"agnes-2.5-flash",temperature:0.3,response_format:{type:"json_object"},messages:[{role:"system",content:sys},{role:"user",content:JSON.stringify({task,payload})}]};
+for(const delay of [0,4000]){if(delay)await sleep(delay);const ctl=new AbortController();const t0=Date.now();const tick=setInterval(()=>{$("st").textContent=label+" 已等待 "+Math.round((Date.now()-t0)/1000)+" 秒";},1000);const tm=setTimeout(()=>ctl.abort(),75000);
+try{const r=await fetch(base+"/chat/completions",{method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+key},body:JSON.stringify(body),signal:ctl.signal});clearInterval(tick);clearTimeout(tm);if(r.status===429)continue;const d=await r.json().catch(()=>({}));if(!r.ok)throw new Error((d.error&&d.error.message)||("HTTP "+r.status));return pj(d.choices[0].message.content||"{}")}catch(e){clearInterval(tick);clearTimeout(tm);if(delay===4000)throw new Error(label+" 失败："+(e.name==="AbortError"?"75秒超时":e.message))}}throw new Error(label+" 限流失败")}
+const SYS={i:"你是关系解释器。只输出严格JSON: {\"observed_facts\":[],\"possible_interpretations\":[{\"hypothesis\":\"可能……\",\"confidence\":0.0,\"evidence\":[]}],\"uncertainties\":[]}。事实推测分开。用中文。",
+s:"你是关系阶段估计器。只输出严格JSON: {\"stage\":\"暧昧\",\"confidence\":0.0}。用中文。",
+t:"你是关系战略师。只输出严格JSON: {\"strategy\":\"一句话\",\"reply_intent\":\"low_pressure_reconnect\",\"wait_or_reply\":\"reply\"}。禁止操控施压。用中文。",
+g:"你是中文回复生成器。只输出严格JSON: {\"candidates\":[{\"label\":\"自然型\",\"text\":\"短句\"}]}。最多3条。用中文。",
+sim:"你是对方模拟器。只输出严格JSON: {\"interpretation\":\"\",\"possible_reply\":\"\",\"pressure\":0.0,\"risk\":0.0,\"uncertainty\":\"概率模拟\"}。结合人物设定。用中文。",
+cr:"你是回复Critic。只输出严格JSON: {\"llm_pass\":true,\"issues\":[]}。用中文。",
+rv:"你是回复修正器。只输出严格JSON: {\"text\":\"修正短句\"}。用中文。"};
+async function run(){const steps=[];const ctx={current_message:$("msg").value,recent_context:$("c").value,person:{traits:$("p").value},provided_stage:$("s").value,mode:$("m").value};
+const step=(t,fin)=>{steps.push(t);$("st").textContent=t;$("out").innerHTML='<div class="card"><div class="step">'+steps.join("\n")+'</div>'+(fin?'<div class="mut">最终建议回复</div><div class="fin">'+fin+'</div>':"")+'</div>'};
+try{step("1/7 解读中…");const it=await call("interpret",SYS.i,{context:ctx},"解读");step("解读："+(it.possible_interpretations||[]).map(x=>(x.hypothesis||x)+"（"+(x.confidence??"")+"）").join("；"));
+step("2/7 阶段中…");const stg=await call("stage",SYS.s,{context:{...ctx,interpretations:it}},"阶段");step("阶段："+stg.stage+" "+stg.confidence);
+step("3/7 战略中…");const str=await call("strategize",SYS.t,{context:{...ctx,stage:stg,interpretations:it}},"战略");step("战略："+str.strategy);
+step("4/7 生成中…");const gen=await call("generate",SYS.g,{context:{...ctx,stage:stg,strategy:str}},"生成");let cands=(gen.candidates||[]).map(c=>typeof c==="string"?{text:c}:c).filter(c=>c&&c.text);step("候选："+cands.map(c=>c.text).join(" / "));
+let best=null;for(let i=0;i<cands.length;i++){let cand=cands[i];for(let a=0;a<=3;a++){step("5/7 模拟候选"+(i+1)+"…");const sim=await call("simulate",SYS.sim,{context:{...ctx,candidate:cand}},"模拟");step("模拟 risk="+sim.risk+"："+(sim.interpretation||""));step("6/7 Critic…");const cr=await call("critic",SYS.cr,{context:{...ctx,candidate:cand,simulation:sim}},"Critic");if(cr.llm_pass||a===3){if(!best||sim.risk<best.sim.risk)best={cand,sim};break}const rv=await call("revise",SYS.rv,{context:{...ctx,candidate:cand,critic:cr}},"修正");if(rv.text)cand={...cand,text:rv.text}}}
+const sen=/分手|复合|借钱|转账|结婚|离婚|威胁|法律/.test(ctx.current_message);let dec=!best?"建议不回复":ctx.mode==="suggest"?"建议模式":sen?"敏感，必须确认":(ctx.mode==="autopilot"&&best.sim.risk<=0.35?"自动驾驶达标":"等确认");step("7/7 决策："+dec,best?best.cand.text:"（建议不回复）")}catch(e){$("st").textContent="出错："+e.message}}
+$("go").onclick=()=>{if(busy)return;busy=true;$("go").disabled=true;run().finally(()=>{busy=false;$("go").disabled=false})};
+</script></body></html>

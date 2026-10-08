@@ -4,8 +4,9 @@ _SERIAL_LOCK=threading.Lock()  # serial-only: never more than one LLM request in
 from .provider import LLMProvider, LLMUnavailable
 
 class OpenAICompatibleProvider(LLMProvider):
-    """Real OpenAI-compatible chat/completions provider (DeepSeek/OpenAI/etc).
-    Reads the key from the environment variable named in config; never stores it."""
+    """Real OpenAI-compatible chat/completions provider (DeepSeek/OpenAI/Agnes/etc).
+    Reads the key from the environment variable named in config; never stores it.
+    All requests are serial: a module-level lock guarantees one request in flight."""
     name="openai_compatible"
     def __init__(self, base_url: str, model: str, api_key_env: str="LOVE_AGENT_API_KEY", temperature: float=0.3, timeout: float=25):
         self.base_url=(base_url or "").rstrip("/"); self.model=model or ""; self.api_key_env=api_key_env; self.temperature=temperature; self.timeout=timeout
@@ -20,29 +21,30 @@ class OpenAICompatibleProvider(LLMProvider):
               "response_format":{"type":"json_object"}}
         req=urllib.request.Request(self.base_url+"/chat/completions", data=json.dumps(body).encode("utf-8"),
             headers={"Content-Type":"application/json","Authorization":"Bearer "+os.environ[self.api_key_env]})
-        data=None; last_err=None
-        _SERIAL_LOCK.acquire()
-        try:
-            data,last_err=self._request_with_retry(req)
-        finally:
-            _SERIAL_LOCK.release()
-        return data,last_err
-    def _request_with_retry(self, req):
-        data=None; last_err=None
-        for attempt, delay in enumerate([0, 2, 5]):
-            if delay: time.sleep(delay)
-            try:
-                with urllib.request.urlopen(req, timeout=self.timeout) as r: data=json.loads(r.read().decode("utf-8"))
-                break
-            except urllib.error.HTTPError as e:
-                last_err=e
-                if e.code not in (429, 500, 502, 503, 504): raise LLMUnavailable(f"LLM request failed: {e}") from e
-            except Exception as e:
-                last_err=e
-        if data is None: raise LLMUnavailable(f"LLM request failed after retries: {last_err}")
-        return data,last_err
+        with _SERIAL_LOCK:
+            data=self._request_with_retry(req)
         self.calls.append({"task":task,"system":system[:200]})
         try: content=data["choices"][0]["message"]["content"]
         except Exception as e: raise LLMUnavailable(f"unexpected LLM response shape: {e}") from e
         try: return json.loads(content)
-        except Exception as e: raise LLMUnavailable(f"LLM did not return strict JSON for task {task}: {e}") from e
+        except Exception:
+            # tolerate leading prose/newlines: extract the outermost JSON object
+            a, b = content.find("{"), content.rfind("}")
+            if a >= 0 and b > a:
+                try: return json.loads(content[a:b+1])
+                except Exception: pass
+            raise LLMUnavailable(f"LLM did not return strict JSON for task {task}")
+    def _request_with_retry(self, req):
+        last_err=None
+        for delay in (0, 2, 5):
+            if delay: time.sleep(delay)
+            try:
+                with urllib.request.urlopen(req, timeout=self.timeout) as r:
+                    return json.loads(r.read().decode("utf-8"))
+            except urllib.error.HTTPError as e:
+                last_err=e
+                if e.code not in (429, 500, 502, 503, 504):
+                    raise LLMUnavailable(f"LLM request failed: {e}") from e
+            except Exception as e:
+                last_err=e
+        raise LLMUnavailable(f"LLM request failed after retries: {last_err}")
