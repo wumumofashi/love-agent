@@ -1,4 +1,4 @@
-﻿# love-agent
+﻿# 恋爱军师
 
 <div align="center">
 
@@ -190,7 +190,7 @@ python bin/love_agent.py --content "对方说的话" --mode suggest
 
 ## 日本語
 
-### love-agent とは？
+### 恋爱军师 とは？
 
 愛の対話 Strategist AI スキル。チャットメッセージを分析し、返信の効果を予測し、文脈に合わせた返信提案を生成します。戦略的で証拠に基づくコミュニケーションアドバイスを求めます。
 
@@ -217,7 +217,7 @@ python bin/love_agent.py --content "对方说的话" --mode suggest
 
 ## 한국어
 
-### love-agent란?
+### 恋爱军师란?
 
 대화 전략 AI 스킬. 채팅 메시지를 분석하고, 응답 효과를 예측하며, 상황에 맞는 답변을 제안합니다. 증거 기반의 전략적 커뮤니케이션 조언을 원한다면.
 
@@ -325,7 +325,7 @@ Beobachten → Erinnern → Interpretieren → Einschätzen → Strateisieren �
 
 ## Tiếng Việt
 
-### love-agent là gì?
+### 恋爱军师 là gì?
 
 Trợ lý AI quan hệ vòng kín. Phân tích tin nhắn, dự đoán phản hồi, tạo gợi ý phù hợp ngữ cảnh. Cho giao tiếp chiến lược dựa trên bằng chứng.
 
@@ -379,7 +379,7 @@ Amati → Ingat → Interpretasi → Estimasi → Strategi → Generate → Simu
 
 ## Thai
 
-### love-agent คืออะไร?
+### 恋爱军师 คืออะไร?
 
 ที่ปรึกษาความสัมพันธ์ AI แบบวนปิด. วิเคราะห์ข้อความ, คาดการณ์การตอบกลับ, สร้างข้อเสนอที่เหมาะสมตามบริบท. สำหรับการสื่อสารเชิงกลยุทธ์บนพื้นฐานหลักฐาน
 
