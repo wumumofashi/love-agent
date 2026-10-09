@@ -32,7 +32,7 @@ version: "0.1.0"
 
 这是一个闭环系统：Observe → Remember → Interpret → Estimate → Strategize → Generate → Simulate → Critique → Revise → Decide whether to send → Send → Observe reaction → Update memory。
 
-心理学层只负责理解，不直接写最终聊天文本。核心判断由统一 LLM Provider 完成（llm/：interpret→stage→strategize→generate→simulate→critic→revise，OpenAI-compatible，Mock 供 CI）；关键词规则只是 fast pre-classifier、安全门与 LLM 不可用时的 fallback，不得冒充最终智能。KnowledgeBase 的 Tier 条目与人物 Memory 必须实际进入 LLM prompt（可由 llm_prompt_audit 核查）。
+心理学层只负责理解，不直接写最终聊天文本。核心判断由统一 LLM Provider 完成（llm/：interpret→stage→strategize→generate→simulate→critic→revise，OpenAI-compatible，Mock 供 CI。模型由工作台配置，支持任意兼容端点。）；关键词规则只是 fast pre-classifier、安全门与 LLM 不可用时的 fallback，不得冒充最终智能。KnowledgeBase 的 Tier 条目与人物 Memory 必须实际进入 LLM prompt（可由 llm_prompt_audit 核查）。
 
 ## 三种模式（默认建议模式）
 
@@ -137,3 +137,27 @@ memory/people/person_001/   ← 二妹
 - 每次分析结束后自动追加新标签
 - 后续分析自动读取，融入 context  enrich LLM prompt
 - 可在 `memory/cards.json` 中查询所有人标签汇总
+
+
+## 模型配置
+
+本 Skill 不绑定任何特定模型，由工作台（DSH）自行配置。
+
+在 `config/model.json` 中设置：
+```json
+{
+  "provider": "openai_compatible",
+  "base_url": "你的API地址",
+  "model": "你的模型名",
+  "api_key_env": "LOVE_AGENT_API_KEY"
+}
+```
+
+支持任意 OpenAI-compatible 端点，包括：
+- DeepSeek / DeepSeek-V3
+- GPT-4o / GPT-4
+- Claude (via OpenAI compat layer)
+- 国产模型（通义、文心等）
+
+多语言回复需要多语种模型（GPT-4/Claude/DeepSeek-V3），中文偏置模型输出可能不以目标语言为主。
+

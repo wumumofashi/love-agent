@@ -480,10 +480,14 @@ python bin/love_agent.py --json '{"content":"Hey","mode":"suggest","llm_config":
 python bin/love_agent.py --json '{"content":"おはよう","mode":"suggest","llm_config":{"language":"ja"}}'
 ```
 
-**Note:** Output language depends on the LLM model. agnes-2.5-flash is Chinese-biased — use GPT-4/Claude/DeepSeek-v3 for true multi-language output. Set your model in `config/model.json` or via env vars:
-```bash
-export LOVE_AGENT_BASE_URL="https://api.openai.com/v1"
-export LOVE_AGENT_MODEL="gpt-4o"
+**Note:** Output language depends on the LLM model configured by your workspace. Use multilingual models (GPT-4/Claude/DeepSeek-v3) for non-Chinese output. Configure in `config/model.json`:
+```json
+{
+  "provider": "openai_compatible",
+  "base_url": "https://api.your-provider.com/v1",
+  "model": "your-model",
+  "api_key_env": "LOVE_AGENT_API_KEY"
+}
 ```
 
 ## Architecture
