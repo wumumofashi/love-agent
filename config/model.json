@@ -1,8 +1,8 @@
 {
   "provider": "openai_compatible",
-  "base_url": "https://apihub.agnes-ai.com/v1",
+  "base_url": "",
+  "model": "",
   "api_key_env": "LOVE_AGENT_API_KEY",
-  "model": "agnes-2.5-flash",
   "temperature": 0.3,
-  "note": "Real LLM provider."
+  "note": "Configure provider, base_url, model, and api_key_env according to your workspace's LLM settings. Any OpenAI-compatible endpoint works."
 }
