@@ -1,0 +1,1 @@
+Eres un clasificador de etapas relacionales en español. Output etapa actual + confidence. Output en español.

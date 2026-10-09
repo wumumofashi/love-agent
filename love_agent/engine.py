@@ -104,16 +104,29 @@ class LoveAgentEngine:
         ctx["knowledge_used"]=kb_hits
         kb_block=self.kb.prompt_block(kb_hits)
         # ---- LLM chain: interpret -> stage -> strategize -> generate -> simulate -> critic/revise ----
-        llm_cfg=raw.get("llm_config") or {k:self.config[k] for k in ("provider","base_url","model","api_key_env","temperature") if k in self.config}
+        llm_cfg=raw.get("llm_config") or {k:self.config[k] for k in ("provider","base_url","model","api_key_env","temperature","language") if k in self.config}
         provider=raw.get("llm_provider_instance") or load_provider(self.root, llm_cfg)
         ctx["llm_provider"]=getattr(provider,"name","unknown")
         ctx["llm_provider_used"]=ctx["llm_provider"]
         if getattr(provider,"fallback_reason",""): ctx["llm_fallback_reason"]=provider.fallback_reason
         ctx["real_llm_available"]=ctx["llm_provider"]=="openai_compatible"
         prompts_dir=self.root/"llm/prompts"
+        lang=self.config.get("language","zh")
+        lang_map={"zh":"中文","en":"English","ja":"日本語","ko":"한국어","es":"Español","fr":"Français","de":"Deutsch","vi":"Tiếng Việt","id":"Indonesia","th":"ไทย"}
+        lang_name=lang_map.get(lang,"中文")
         def sysprompt(name):
-            fp=prompts_dir/f"{name}.md"
-            return fp.read_text(encoding="utf-8") if fp.exists() else f"You are the love-agent {name}. Output strict JSON only."
+            lang_short = lang if lang in ("en","ja","ko","es","fr","de","vi","id","th") else "zh"
+            fp_lang = prompts_dir/f"{name}_{lang_short}.md"
+            fp_default = prompts_dir/f"{name}.md"
+            if fp_lang.exists():
+                base = fp_lang.read_text(encoding="utf-8")
+            elif fp_default.exists():
+                base = fp_default.read_text(encoding="utf-8")
+            else:
+                base = f"You are the love-agent {name}. Output strict JSON only."
+            if "{{LANGUAGE}}" in base:
+                base = base.replace("{{LANGUAGE}}", lang_name)
+            return base
         def payload(extra=None):
             base={"context":{"current_message":text,"recent_context":ctx["recent_context"],"person":ctx["person"],
                              "person_memory":mem,"provided_stage":raw.get("relationship_stage",""),"pre_flags":flags,

@@ -27,5 +27,18 @@
     "voice_provider": "learnlove-sensevoice-or-whisper",
     "vision_provider": "learnlove-qwen2.5-vl-or-remote",
     "ocr_provider": "lovehelper-wechat-ocr"
-  }
+  },
+  "language": "zh",
+  "languages": [
+    "zh",
+    "en",
+    "ja",
+    "ko",
+    "es",
+    "fr",
+    "de",
+    "vi",
+    "id",
+    "th"
+  ]
 }
