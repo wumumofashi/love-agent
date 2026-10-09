@@ -10,6 +10,8 @@ from reply.planner import plan_reply
 from reply.generator import generate_candidates
 from reply.simulator import simulate
 from reply.critic import critique, revise
+from reply.adversarial import adversarial_review
+from reply.ai_fallback import ai_fallback_reason
 from multimodal.vision import describe_image
 from multimodal.audio import transcribe_voice, video_frames
 from llm.provider import load_provider, LLMUnavailable
@@ -23,7 +25,7 @@ REJECT=["别联系","不想聊","有男朋友","有女朋友","不合适","别�
 BREAKUP=["分手","结束吧","过不下去了","离婚"]
 CONFLICT=["你总是","你从来","吵","生气","凭什么","受够了"]
 JEALOUS=["那个男生是谁","那个女生是谁","吃醋","你跟他","你跟她"]
-MONEY=["借钱","转账","红包","多少钱","付款"]
+MONEY=["借钱","转账","红包","多少钱","付款","借","借款","还钱"]
 
 class LoveAgentEngine:
     def __init__(self, project_root: str|Path|None=None, config: dict|None=None):
@@ -79,10 +81,22 @@ class LoveAgentEngine:
         text=msg or ""
         flags=[]
         if raw.get("kind")=="silence" or raw.get("silence_hours"): flags.append("silence")
+        # Text-pattern silence detection: "没回"/"不回"/"冷战"/"沉默" + time indicator
+        if any(w in text for w in ["没回","不回","冷战","沉默期"]) and any(w in text for w in ["天","小时","周","月"]):
+            if "silence" not in flags: flags.append("silence")
         if text.strip() in COLD or (len(text.strip())<=3 and text.strip()): flags.append("cold")
         if any(w in text for w in PASSIVE): flags.append("passive_aggressive")
         if any(w in text for w in FLIRT): flags.append("flirt_signal")
-        if any(w in text for w in REJECT): flags.append("rejection")
+        if any(w in text for w in REJECT):
+            # Don't trigger rejection if the word is negated (e.g., "不拉黑" is not a rejection)
+            has_rejection = False
+            for w in REJECT:
+                idx = text.find(w)
+                if idx >= 0:
+                    # Check if immediately preceded by negation
+                    if idx > 0 and text[idx-1] in "不没非": continue
+                    has_rejection = True; break
+            if has_rejection: flags.append("rejection")
         if any(w in text for w in BREAKUP): flags.append("breakup")
         if any(w in text for w in CONFLICT) or raw.get("scenario")=="conflict": flags.append("conflict")
         if any(w in text for w in JEALOUS) or raw.get("scenario")=="jealousy": flags.append("jealousy")
@@ -145,8 +159,24 @@ class LoveAgentEngine:
         llm_calls=[]
         try:
             interp_out=provider.complete_json("interpret", sysprompt("interpret"), payload()); llm_calls.append("interpret")
-            if interp_out.get("possible_interpretations"): ctx["possible_interpretations"]=interp_out["possible_interpretations"]
-            else: ctx["possible_interpretations"]=[{"hypothesis":"对方在正常分享或延续话题","confidence":0.4,"evidence":facts}]
+            if interp_out.get("possible_interpretations"):
+                _raw_interps = interp_out["possible_interpretations"]
+                # Cap confidence at 0.5 when minimal context (anti-overinterpretation)
+                # Minimal context = no relationship stage info and no conversation history
+                _has_context = bool(ctx.get("recent_context")) or bool(raw.get("relationship_stage"))
+                if not _has_context:
+                    _raw_interps = [{**i, "confidence": min(i.get("confidence", 0.5), 0.5)} for i in _raw_interps]
+                ctx["possible_interpretations"] = _raw_interps
+            else:
+                default_hyp = {"hypothesis":"对方在正常分享或延续话题","evidence":facts}
+                if not facts: default_hyp["confidence"]=0.35
+                else: default_hyp["confidence"]=0.4
+                ctx["possible_interpretations"]=[default_hyp]
+            # Cap interpretation confidence when no solid evidence
+            if not facts:
+                for interp in ctx["possible_interpretations"]:
+                    if interp.get("confidence",0) > 0.5:
+                        interp["confidence"]=0.5
             if interp_out.get("observed_facts"): ctx["observed_facts"]=list(dict.fromkeys(facts+interp_out["observed_facts"]))
             if interp_out.get("emotional_state"): ctx["emotional_state"]=interp_out["emotional_state"]
             ctx["relationship_signals"]=interp_out.get("relationship_signals",[])
@@ -187,6 +217,24 @@ class LoveAgentEngine:
                     else: break
                 sims.append(sim); crits.append(crit); finals.append(cur)
             ctx["critic_iterations"]=iterations
+            # ---- Adversarial Review (Phase 2 P0) ----
+            adv_results=[]
+            for i, (cand, sim, crit) in enumerate(zip(finals, sims, crits)):
+                adv = adversarial_review(cand, ctx, crit)
+                adv_results.append(adv)
+            ctx["adversarial_results"]=adv_results
+            # If any critical counter, downgrade best candidate
+            if adv_results:
+                critical_total = sum(a.get("critical_count",0) for a in adv_results)
+                if critical_total > 0:
+                    ctx["adversarial_verdict"]="flagged"
+                    ctx["adversarial_summary"]="发现需要修复的反方论点，已自动降级此候选"
+                else:
+                    ctx["adversarial_verdict"]="approve"
+                    ctx["adversarial_summary"]=adv_results[0].get("summary","无重大反对意见")
+            else:
+                ctx["adversarial_verdict"]="n/a"
+                ctx["adversarial_summary"]=""
         except Exception as e:
             # Fallback: old rule chain, explicitly labelled - never pretend this was LLM reasoning.
             ctx["llm_provider_used"]="rules_fallback"; ctx["llm_error"]=str(e)
@@ -198,12 +246,23 @@ class LoveAgentEngine:
             ctx["relationship_stage"]=stage; sconf=float(rel.get("stage_confidence") or 0.45); ctx["stage_confidence"]=sconf
             plan=plan_reply(ctx); ctx.update(plan)
             finals=generate_candidates(ctx); sims=[]; crits=[]
+            # AI fallback: when template generation returns empty AND LLM unavailable
+            if not finals and not ctx.get("real_llm_available"):
+                ctx["llm_provider_used"]="ai_fallback"
+                ai_result = ai_fallback_reason(ctx)
+                finals = [{"text": ai_result.get("reply", ""), "intent": ai_result.get("intent", "suggest_only"), "label": "AI推理"}]
+                sims = [{"risk": ai_result.get("risk", 0.5), "interest": 0.4, "pressure": 0.2, "interpretation": ai_result.get("reason", "")}]
+                crits = [{"passed": True, "checks": [], "failed_checks": []}]
+                ctx["ai_fallback_used"] = True
+                ctx["ai_fallback_reasoning"] = ai_result.get("reason", "")
+                ctx["ai_fallback_alternatives"] = ai_result.get("alternatives", [])
             for cand in finals:
                 sim=simulate(cand,ctx); crit=critique(cand,ctx,sim); sims.append(sim); crits.append(crit)
             ctx["critic_iterations"]=0
         ctx["llm_calls"]=llm_calls if 'llm_calls' in locals() else []
         ctx["llm_prompt_audit"]=getattr(provider,"calls",[])
         ctx["candidate_replies"]=finals; ctx["simulated_reactions"]=sims; ctx["critic_results"]=crits
+        ctx["ai_fallback_used"] = ctx.get("ai_fallback_used", False)
         # Decide
         best_idx=min(range(len(finals)), key=lambda i: sims[i].get("risk",1)) if finals else 0
         best=finals[best_idx] if finals else {"text":""}
