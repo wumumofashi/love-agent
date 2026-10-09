@@ -453,6 +453,39 @@ Or configure in `config/model.json`:
 }
 ```
 
+
+## Multi-Language Support
+
+The engine supports 10 languages via prompt file variants (70 files: 7 prompts x 10 languages).
+
+| Language | Code | Config |
+|----------|------|--------|
+| 中文 Chinese | `zh` | default |
+| English | `en` | `{"language":"en"}` |
+| 日本語 Japanese | `ja` | `{"language":"ja"}` |
+| 한국어 Korean | `ko` | `{"language":"ko"}` |
+| Espa\u00f1ol Spanish | `es` | `{"language":"es"}` |
+| Français French | `fr` | `{"language":"fr"}` |
+| Deutsch German | `de` | `{"language":"de"}` |
+| Ti\u1ebfng Vi\u1ec7t Vietnamese | `vi` | `{"language":"vi"}` |
+| Bahasa Indonesia | `id` | `{"language":"id"}` |
+| ภาษาไทย Thai | `th` | `{"language":"th"}` |
+
+**Usage:**
+```bash
+# English mode
+python bin/love_agent.py --json '{"content":"Hey","mode":"suggest","llm_config":{"language":"en"}}'
+
+# Japanese mode
+python bin/love_agent.py --json '{"content":"おはよう","mode":"suggest","llm_config":{"language":"ja"}}'
+```
+
+**Note:** Output language depends on the LLM model. agnes-2.5-flash is Chinese-biased — use GPT-4/Claude/DeepSeek-v3 for true multi-language output. Set your model in `config/model.json` or via env vars:
+```bash
+export LOVE_AGENT_BASE_URL="https://api.openai.com/v1"
+export LOVE_AGENT_MODEL="gpt-4o"
+```
+
 ## Architecture
 
 See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) for full system design.

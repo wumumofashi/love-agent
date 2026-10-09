@@ -112,6 +112,10 @@ class LoveAgentEngine:
         ctx["real_llm_available"]=ctx["llm_provider"]=="openai_compatible"
         prompts_dir=self.root/"llm/prompts"
         lang=self.config.get("language","zh")
+        # Allow runtime llm_config to override language
+        _rc = raw.get("llm_config") or {}
+        if "language" in _rc:
+            lang = _rc["language"]
         lang_map={"zh":"中文","en":"English","ja":"日本語","ko":"한국어","es":"Español","fr":"Français","de":"Deutsch","vi":"Tiếng Việt","id":"Indonesia","th":"ไทย"}
         lang_name=lang_map.get(lang,"中文")
         def sysprompt(name):
@@ -129,6 +133,7 @@ class LoveAgentEngine:
             return base
         def payload(extra=None):
             base={"context":{"current_message":text,"recent_context":ctx["recent_context"],"person":ctx["person"],
+                             "language":lang,"lang_name":lang_map.get(lang,"中文"),
                              "person_memory":mem,"provided_stage":raw.get("relationship_stage",""),"pre_flags":flags,
                              "observed_facts":facts,"multimodal":mm,"multimodal_kind":mm.get("kind","text"),
                              "relationship_stage":ctx.get("relationship_stage",""),"possible_interpretations":ctx.get("possible_interpretations",[]),
